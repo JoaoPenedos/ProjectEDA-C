@@ -9,10 +9,10 @@
 
 int main(int argc, char const *argv[]) {
     job *jobList;
-    int opcao;
+    int opcao, idCont = 0;
     
     jobList = inicializarJob();
-	verificarDadosNoFicheiro(jobList);
+	verificarDadosNoFicheiro(jobList->op,&idCont);
 
     do {
         menu(&opcao);
@@ -20,13 +20,13 @@ int main(int argc, char const *argv[]) {
         switch(opcao) {
             case 0: printf("Goodbye!!\n\n"); 
 					break;
-            case 1: insertNewOperation(jobList); 
+            case 1: insertNewOperation(jobList->op,&idCont); 
 					break;
-            case 2: listOperation(jobList); 
+            case 2: listOperation(jobList->op); 
 					break;
             case 3: removeOperation(&jobList);
 					break;
-            case 4: editOperation(jobList);
+            case 4: editOperation(&(jobList->op));
 					break;
             case 5: determineShortestTime(jobList);
 					break;

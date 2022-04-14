@@ -7,6 +7,12 @@
 #include <conio.h>
 #include <errno.h>
 
+#ifdef _WIN32
+#include <Windows.h>
+#else
+#include <unistd.h>
+#endif
+
 #pragma region Structs 
 
 // typedef struct machine {
@@ -35,12 +41,12 @@ typedef struct job {
 job *inicializarJob();
 operation *inicializarOperation();
 // machine *inicializarMachine();
-void verificarDadosNoFicheiro(job *jobList);
+void verificarDadosNoFicheiro(operation *op, int *idCont);
 void menu(int *opcao);
-void insertNewOperation(job *jobList);
-void listOperation(job *jobList);
+void insertNewOperation(operation *op, int *idCont);
+void listOperation(operation *op);
 void removeOperation(job **jobList);
-void editOperation(job *jobList);
+void editOperation(operation **op);
 void determineShortestTime(job *jobList);
 void determineLongestTime(job *jobList);
 void determineAverageTime(job *jobList);

@@ -55,51 +55,17 @@ operation *inicializarOperation() {
 // 	}
 // }
 //#####################################################################################################
-void lerOp(operation *opP) {
-    char input[50];
-    int cont = 0, i, j;
-
-	//snprintf((*m).codigo,sizeof((*m).codigo),"M_%d",lastCodM);
-
-	(*opP).id = 1;
-
-    printf("Qunatas maquinas vao poder ser utilizadas para esta operacao: ");
-	fgets(input, sizeof(input), stdin);
-	cont = strtol(input, NULL, 0);
-
-	(*opP).quantMachines = cont;
-	(*opP).machineAndTime = (int *)malloc(sizeof(int[2][cont]));
-	for (i = 0; i < 2; ++i) {
-		for (j = 0; j < cont; ++j) {
-			if(i==0) {
-				printf("Qual o id da maquina que pertende usar: ");
-				fgets(input, sizeof(input), stdin);
-				(*opP).machineAndTime[i*cont + j] = strtol(input, NULL, 0);
-			}
-			else {
-				printf("Qual o tempo que a %d maquina vai demorar: ", (*opP).machineAndTime[0*cont + j]);
-				fgets(input, sizeof(input), stdin);
-				(*opP).machineAndTime[i*cont + j] = strtol(input, NULL, 0);
-			}
-		}
-	}
-
-    (*opP).next=NULL;
-}
-//#####################################################################################################
-void verificarDadosNoFicheiro(job *jobList) {
+void verificarDadosNoFicheiro(operation *op, int *idCont) {
 	operation *opP, *auxOp;
 	FILE *f_JOB = fopen("test.txt","r");
 	char symb ;
     unsigned char symbI;
-	int x = 4, i = 0, cont = 0, success = 0, arrayM[100], arrayT[100];
+	int i = 0, cont = 0, success = 0, arrayM[100], arrayT[100];
 
     if(f_JOB != NULL) {
-		auxOp = jobList->op;
 		do {
 			if((symb = getc(f_JOB)) != EOF) {
-				i=0;
-				cont=0;
+				i = cont = 0;
 				while ((symb=getc(f_JOB))!='\n') {
 					symbI = (int) symb;
 					if(symbI >= '0' && symbI <='9') {
@@ -117,22 +83,23 @@ void verificarDadosNoFicheiro(job *jobList) {
 					}
 				}
 
-				while((*auxOp).next != NULL) {
-					auxOp = (*auxOp).next;
+				opP=(operation *)malloc(sizeof(operation));
+				(*opP).next=NULL;
+
+				while((*op).next != NULL) {
+					op = (*op).next;
 				}
 
-				(*auxOp).id = 1;
-				(*auxOp).quantMachines = cont;
-				(*auxOp).machineAndTime = (int *)malloc(sizeof(int[2][cont]));
-				(*auxOp).next = (operation *)malloc(sizeof(operation));
-				(*(*auxOp).next).next = NULL;
-
+				(*idCont)++;
+				(*op).id = (*idCont);
+				(*op).quantMachines = cont;
+				(*op).machineAndTime = (int *)malloc(sizeof(int[2][cont]));
+				(*op).next = (operation *)malloc(sizeof(operation));
 				for(i=0; i < cont; i++) {
-					(*auxOp).machineAndTime[0*cont + i] = arrayM[i];
-					// printf("+%c",(*auxOp).machineAndTime[0*cont + i]);
-					(*auxOp).machineAndTime[1*cont + i] = arrayT[i];
-					// printf("-%c\n",(*auxOp).machineAndTime[1*cont + i]);
+					(*op).machineAndTime[0*cont + i] = arrayM[i];
+					(*op).machineAndTime[1*cont + i] = arrayT[i];
 				}
+				(*op).next = opP;
 				success = 0;
 			}
 			else{
@@ -144,86 +111,282 @@ void verificarDadosNoFicheiro(job *jobList) {
     fclose(f_JOB);
 }
 //#####################################################################################################
-void insertNewOperation(job *jobList) {
+void insertNewOperation(operation *op, int *idCont) {
     char *input;
-    int cont = 0, i, j;
+    int i, j;
 	operation *auxOp;
 
-	auxOp = jobList->op;
+	auxOp = (operation *)malloc(sizeof(operation));
 	
 	system("cls");
 	if(auxOp==NULL) { 
 		printf("Nao existe mais espaço em memoria. E impossivel inserir\n\n");
 		system("pause");
 	}
-	else {		
+	else {
 		system("cls");
-
-		while(((*auxOp).next) != NULL) {
-			auxOp = (*auxOp).next;
+        (*auxOp).next=NULL;
+		while(((*op).next) != NULL) {
+			op = (*op).next;
 		}
-		(*auxOp).id = 1;
+
+		(*idCont)++;
+		(*op).id = (*idCont);
 
 		printf("Quantas maquinas vao poder ser utilizadas para esta operacao: ");
 		fgets(input, sizeof(input), stdin);
-		cont = strtol(input, NULL, 0);
-		(*auxOp).quantMachines = cont;
-
-		(*auxOp).machineAndTime = (int *)malloc(sizeof(int[2][cont]));
-		(*auxOp).next = (operation *)malloc(sizeof(operation));
-		(*(*auxOp).next).next = NULL;
+		(*op).quantMachines = strtol(input, NULL, 0);
+		(*op).machineAndTime = (int *)malloc(sizeof(int[2][(*op).quantMachines]));
 		for (i = 0; i < 2; ++i) {
-			for (j = 0; j < cont; ++j) {
+			for (j = 0; j < (*op).quantMachines; ++j) {
 				if(i==0) {
 					printf("Qual o id da maquina que pertende usar: ");
 					fgets(input, sizeof(input), stdin);
-					(*auxOp).machineAndTime[i*cont + j] = strtol(input, NULL, 10);
+					(*op).machineAndTime[i*(*op).quantMachines + j] = strtol(input, NULL, 10);
 				}
 				else {
-					printf("Qual o tempo que a %d maquina vai demorar: ", (*auxOp).machineAndTime[0*cont + j]);
+					printf("Qual o tempo que a %d maquina vai demorar: ", (*op).machineAndTime[0*(*op).quantMachines + j]);
 					fgets(input, sizeof(input), stdin);
-					(*auxOp).machineAndTime[i*cont + j] = strtol(input, NULL, 10);
+					(*op).machineAndTime[i*(*op).quantMachines + j] = strtol(input, NULL, 10);
 				}
 			}
 		}
+		(*op).next = auxOp;
 	}
 }
-
-void listOperation(job *jobList) {
-	int i = 0, j = 0;
-	operation *auxOp;
-	
-	auxOp = jobList->op;
+//#####################################################################################################
+void listOperation(operation *op) {
+	int i = 0, j = 0;	
 
 	system("cls");
 	puts("Dados disponiveis: ");
-	if(auxOp==NULL)	{
+	if((*op).next==NULL)	{
 		puts("Nenhum");
 	}
 	else {
-		// printf("\n\n%-10s%-15s%s\n","Id","machine","Tempo");
-		while((*auxOp).next != NULL) {
-			printf("Id - (%d)\n",(*auxOp).id);
-			printf("Machine Quant. - (%d)\nMachine - (",(*auxOp).quantMachines);
-			for (j = 0; j < (*auxOp).quantMachines; ++j) {
-				printf("%d,",(*auxOp).machineAndTime[0*(*auxOp).quantMachines + j]);
+		while((*op).next != NULL) {
+			printf("Id - (%d)\n",(*op).id);
+			printf("Machine - (");
+			for (j = 0; j < (*op).quantMachines; ++j) {
+				if(((*op).quantMachines - j) == 1)
+					printf("%d",(*op).machineAndTime[0*(*op).quantMachines + j]);
+				else
+					printf("%d,",(*op).machineAndTime[0*(*op).quantMachines + j]);
 			}
 			printf(")\nTime - (");
-			for (j = 0; j < (*auxOp).quantMachines; ++j) {
-				printf("%d,",(*auxOp).machineAndTime[1*(*auxOp).quantMachines + j]);	
+			for (j = 0; j < (*op).quantMachines; ++j) {
+				if(((*op).quantMachines - j) == 1)
+					printf("%d",(*op).machineAndTime[1*(*op).quantMachines + j]);
+				else
+					printf("%d,",(*op).machineAndTime[1*(*op).quantMachines + j]);	
 			}
 			printf(")\n\n");
-			auxOp=(*auxOp).next;
+			op=(*op).next;
 		}
 	}
 	printf("\n\n");
 	system("pause");
 }
-void removeOperation(job **jobList) {}
-void editOperation(job *jobList) {}
+//#####################################################################################################
+void removeOperation(job **jobList) {
+	operation *y, *atras, *frente, *auxOp;
+	int j, intElemRetirar;
+	char elemRetirar[40];
+
+	system("cls");
+	y=(*jobList)->op;
+	
+	if(((*y).next)==NULL) { 
+		printf("A lista nao tem dados"); 
+	}
+	else {
+		printf("Diga o codigo cujo meio de mobilidade quer retirar?\n");
+		if(fgets(elemRetirar, sizeof(elemRetirar), stdin)) {
+			elemRetirar[strcspn(elemRetirar, "\n")] = 0;
+			intElemRetirar = strtol(elemRetirar, NULL, 0);
+		}
+
+		if(intElemRetirar == (*(*jobList)->op).id) {
+			system ("cls");
+			printf("O elemento foi retirado\n");
+			printf("Id - (%d)\n",(*(*jobList)->op).id);
+			printf("Machine Quant. - (%d)\nMachine - (",(*(*jobList)->op).quantMachines);
+			for (j = 0; j < (*(*jobList)->op).quantMachines; ++j) {
+				if(((*(*jobList)->op).quantMachines - j) == 1)
+					printf("%d",(*(*jobList)->op).machineAndTime[0*(*(*jobList)->op).quantMachines + j]);
+				else
+					printf("%d,",(*(*jobList)->op).machineAndTime[0*(*(*jobList)->op).quantMachines + j]);
+			}
+			printf(")\nTime - (");
+			for (j = 0; j < (*(*jobList)->op).quantMachines; ++j) {
+				if(((*(*jobList)->op).quantMachines - j) == 1)
+					printf("%d",(*(*jobList)->op).machineAndTime[1*(*(*jobList)->op).quantMachines + j]);
+				else
+					printf("%d,",(*(*jobList)->op).machineAndTime[1*(*(*jobList)->op).quantMachines + j]);
+			}
+			printf(")\n");
+			system("pause");
+			(*jobList)->op=(*(*jobList)->op).next;
+			free(y);
+		}
+		else {
+			auxOp=(*jobList)->op;
+			while((intElemRetirar != (*auxOp).id) && ((*(*auxOp).next).next!=NULL)) {
+				atras=auxOp;
+				auxOp=(*auxOp).next;
+				frente=(*auxOp).next;
+			}
+			
+			if(intElemRetirar == (*auxOp).id) {
+				(*atras).next=frente;
+				system ("cls");
+				printf("O elemento foi retirado\n");
+				printf("Id - (%d)\n",(*auxOp).id);
+				printf("Machine - (");
+				for (j = 0; j < (*auxOp).quantMachines; ++j) {
+					if(((*auxOp).quantMachines - j) == 1)
+						printf("%d",(*auxOp).machineAndTime[0*(*auxOp).quantMachines + j]);
+					else
+						printf("%d,",(*auxOp).machineAndTime[0*(*auxOp).quantMachines + j]);
+				}
+				printf(")\nTime - (");
+				for (j = 0; j < (*auxOp).quantMachines; ++j) {
+					if(((*auxOp).quantMachines - j) == 1)
+						printf("%d",(*auxOp).machineAndTime[1*(*auxOp).quantMachines + j]);
+					else
+						printf("%d,",(*auxOp).machineAndTime[1*(*auxOp).quantMachines + j]);
+				}
+				printf(")\n");
+				system("pause");
+				free(auxOp);
+			}
+			else {
+				system("cls"); 
+				printf("O elemento com o codigo %s nao existe na lista", elemRetirar);
+			}
+		}
+	}
+}
+//#####################################################################################################
+void editOperation(operation **operationList) {
+	operation *auxOp;
+	int i, j, intElemEditar;
+	char elemEditar[40], *input;
+
+	system("cls");
+	
+	if(((*(*operationList)).next)==NULL) { 
+		printf("A lista nao tem dados"); 
+	}
+	else {
+		printf("Diga o codigo cujo meio de mobilidade quer retirar?\n");
+		if(fgets(elemEditar, sizeof(elemEditar), stdin)) {
+			elemEditar[strcspn(elemEditar, "\n")] = 0;
+			intElemEditar = strtol(elemEditar, NULL, 0);
+		}
+
+		if(intElemEditar == (*(*operationList)).id) {
+			system ("cls");
+			printf("O elemento a editar\n");
+			printf("Id - (%d)\n",(*(*operationList)).id);
+			printf("Machine Quant. - (%d)\nMachine - (",(*(*operationList)).quantMachines);
+			for (j = 0; j < (*(*operationList)).quantMachines; ++j) {
+				if(((*(*operationList)).quantMachines - j) == 1)
+					printf("%d",(*(*operationList)).machineAndTime[0*(*(*operationList)).quantMachines + j]);
+				else
+					printf("%d,",(*(*operationList)).machineAndTime[0*(*(*operationList)).quantMachines + j]);
+			}
+			printf(")\nTime - (");
+			for (j = 0; j < (*(*operationList)).quantMachines; ++j) {
+				if(((*(*operationList)).quantMachines - j) == 1)
+					printf("%d",(*(*operationList)).machineAndTime[1*(*(*operationList)).quantMachines + j]);
+				else
+					printf("%d,",(*(*operationList)).machineAndTime[1*(*(*operationList)).quantMachines + j]);
+			}
+			printf(")\n\n");
+			free((*(*operationList)).machineAndTime);
+
+			printf("Quantas maquinas vao poder ser utilizadas para esta operacao: ");
+			fgets(input, sizeof(input), stdin);
+			(*(*operationList)).quantMachines = strtol(input, NULL, 0);
+			(*(*operationList)).machineAndTime = (int *)malloc(sizeof(int[2][(*(*operationList)).quantMachines]));
+			for (i = 0; i < 2; ++i) {
+				for (j = 0; j < (*(*operationList)).quantMachines; ++j) {
+					if(i==0) {
+						printf("Qual o id da maquina que pertende usar: ");
+						fgets(input, sizeof(input), stdin);
+						(*(*operationList)).machineAndTime[i*(*(*operationList)).quantMachines + j] = strtol(input, NULL, 10);
+					}
+					else {
+						printf("Qual o tempo que a %d maquina vai demorar: ", (*(*operationList)).machineAndTime[0*(*(*operationList)).quantMachines + j]);
+						fgets(input, sizeof(input), stdin);
+						(*(*operationList)).machineAndTime[i*(*(*operationList)).quantMachines + j] = strtol(input, NULL, 10);
+					}
+				}
+			}
+		}
+		else {
+			auxOp=(*operationList);
+			while((intElemEditar != (*(*operationList)).id) && (*(*operationList)).next != NULL) {
+				(*operationList) = (*(*operationList)).next;
+			}
+			
+			if(intElemEditar == (*(*operationList)).id) {
+				system ("cls");
+				printf("O elemento a editar\n");
+				printf("Id - (%d)\n",(*(*operationList)).id);
+				printf("Machine Quant. - (%d)\nMachine - (",(*(*operationList)).quantMachines);
+				for (j = 0; j < (*(*operationList)).quantMachines; ++j) {
+					if(((*(*operationList)).quantMachines - j) == 1)
+						printf("%d",(*(*operationList)).machineAndTime[0*(*(*operationList)).quantMachines + j]);
+					else
+						printf("%d,",(*(*operationList)).machineAndTime[0*(*(*operationList)).quantMachines + j]);
+				}
+				printf(")\nTime - (");
+				for (j = 0; j < (*(*operationList)).quantMachines; ++j) {
+					if(((*(*operationList)).quantMachines - j) == 1)
+						printf("%d",(*(*operationList)).machineAndTime[1*(*(*operationList)).quantMachines + j]);
+					else
+						printf("%d,",(*(*operationList)).machineAndTime[1*(*(*operationList)).quantMachines + j]);
+				}
+				printf(")\n\n");
+				free((*(*operationList)).machineAndTime);
+
+				printf("Quantas maquinas vao poder ser utilizadas para esta operacao: ");
+				fgets(input, sizeof(input), stdin);
+				(*(*operationList)).quantMachines = strtol(input, NULL, 0);
+				(*(*operationList)).machineAndTime = (int *)malloc(sizeof(int[2][(*(*operationList)).quantMachines]));
+				for (i = 0; i < 2; ++i) {
+					for (j = 0; j < (*(*operationList)).quantMachines; ++j) {
+						if(i==0) {
+							printf("Qual o id da maquina que pertende usar: ");
+							fgets(input, sizeof(input), stdin);
+							(*(*operationList)).machineAndTime[i*(*(*operationList)).quantMachines + j] = strtol(input, NULL, 10);
+						}
+						else {
+							printf("Qual o tempo que a %d maquina vai demorar: ", (*(*operationList)).machineAndTime[0*(*(*operationList)).quantMachines + j]);
+							fgets(input, sizeof(input), stdin);
+							(*(*operationList)).machineAndTime[i*(*(*operationList)).quantMachines + j] = strtol(input, NULL, 10);
+						}
+					}
+				}
+				(*operationList) = auxOp;
+				free(auxOp);
+			}
+			else {
+				system("cls"); 
+				printf("O elemento com o codigo %s nao existe na lista", elemEditar);
+			}
+		}
+	}
+}
+//#####################################################################################################
 void determineShortestTime(job *jobList) {}
+//#####################################################################################################
 void determineLongestTime(job *jobList) {}
+//#####################################################################################################
 void determineAverageTime(job *jobList) {}
+//#####################################################################################################
 
 
 
@@ -237,17 +400,17 @@ void menu(int *opcao) {
 	do {
 		system("cls");
 
-		printf("%c",201); for(i = 0; i < 86; i++) printf("%c",205); printf("%c\n",187);
-		_printf_p("%1$c                                         MENU                                         %1$c \n"
-					"%1$c   0 - Exit                                                                           %1$c \n"
-					"%1$c   1 - Insert Operation                                                               %1$c \n"
-					"%1$c   2 - List Operations               5 - Inserir Pedido de Utilizacao                 %1$c \n"
-					"%1$c   3 - Remove Operation              6 - Listagem de todos os Pedidos de utilizacao   %1$c \n"
-					"%1$c   4 - Edit Operation                7 - Remover Pedidos de Utilizacao                %1$c \n",186);
-		printf("%c",200); for(i = 0; i < 86; i++) printf("%c",205); printf("%c\nOption: ",188);
+		printf("%c",201); for(i = 0; i < 69; i++) printf("%c",205); printf("%c\n",187);
+		_printf_p("%1$c                               MENU                                  %1$c \n"
+				  "%1$c   0 - Exit                                                          %1$c \n"
+				  "%1$c   1 - Insert Operation                                              %1$c \n"
+				  "%1$c   2 - List Operations               5 - Determine Shortest Time     %1$c \n"
+				  "%1$c   3 - Remove Operation              6 - Determine Longest Time      %1$c \n"
+				  "%1$c   4 - Edit Operation                7 - Determine Average Time      %1$c \n",186);
+		printf("%c",200); for(i = 0; i < 69; i++) printf("%c",205); printf("%c\nOption: ",188);
 
 		if (!fgets(buf, sizeof(buf), stdin)) {
-			//return 1;
+			success = 0;
 		}
 		errno = 0; // reset error number
 		(*opcao) = strtol(buf, &endptr, 10);
