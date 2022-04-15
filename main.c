@@ -12,7 +12,7 @@ int main(int argc, char const *argv[]) {
     int opcao, idCont = 0;
     
     jobList = inicializarJob();
-	verificarDadosNoFicheiro(jobList->op,&idCont);
+	verificarDadosNoFicheiro(jobList->op,&idCont,&(jobList->nOperations));
 
     do {
         menu(&opcao);
@@ -22,17 +22,17 @@ int main(int argc, char const *argv[]) {
 					break;
             case 1: insertNewOperation(jobList->op,&idCont); 
 					break;
-            case 2: listOperation(jobList->op); 
+            case 2: listOperation(jobList->op,jobList->nOperations); 
 					break;
             case 3: removeOperation(&jobList);
 					break;
-            case 4: editOperation(&(jobList->op));
+            case 4: editOperation(jobList->op);
 					break;
-            case 5: determineShortestTime(jobList);
+            case 5: determineShortestTime(jobList->op);
 					break;
-            case 6: determineLongestTime(jobList);
+            case 6: determineLongestTime(jobList->op);
 					break;
-            case 7: determineAverageTime(jobList);
+            case 7: determineAverageTime(jobList->op);
             		break;
         }
     }while(opcao != 0);
