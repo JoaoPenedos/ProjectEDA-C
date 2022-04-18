@@ -41,7 +41,7 @@ operation *inicializarOperation() {
 //#####################################################################################################
 void verificarDadosNoFicheiro(operation *op, int *idCont, int *nOperations) {
 	operation *opP, *auxOp;
-	FILE *f_JOB = fopen("test.txt","r");
+	FILE *f_JOB = fopen("dados.txt","r");
 	char symb ;
     unsigned char symbI;
 	int i = 0, cont = 0, success = 0, arrayM[100], arrayT[100];
@@ -97,7 +97,7 @@ void verificarDadosNoFicheiro(operation *op, int *idCont, int *nOperations) {
     fclose(f_JOB);
 }
 //#####################################################################################################
-void insertNewOperation(operation *op, int *idCont) {
+void insertNewOperation(operation *op, int *idCont, int *nOperations) {
     char *input;
     int i, j;
 	operation *auxOp;
@@ -116,6 +116,7 @@ void insertNewOperation(operation *op, int *idCont) {
 			op = (*op).next;
 		}
 
+		(*nOperations)++;
 		(*idCont)++;
 		(*op).id = (*idCont);
 
@@ -174,7 +175,7 @@ void listOperation(operation *op, int nOperations) {
 	system("pause");
 }
 //#####################################################################################################
-void removeOperation(job **jobList) {
+void removeOperation(job **jobList, int *nOperations) {
 	operation *y, *atras, *frente, *auxOp;
 	int j, intElemRetirar;
 	char elemRetirar[40];
@@ -194,6 +195,8 @@ void removeOperation(job **jobList) {
 
 		if(intElemRetirar == (*(*jobList)->op).id) {
 			system ("cls");
+			
+			(*nOperations)--;
 			printf("O elemento foi retirado\n");
 			printf("Id - (%d)\n",(*(*jobList)->op).id);
 			printf("Machine Quant. - (%d)\nMachine - (",(*(*jobList)->op).quantMachines);
@@ -226,6 +229,8 @@ void removeOperation(job **jobList) {
 			if(intElemRetirar == (*auxOp).id) {
 				(*atras).next=frente;
 				system ("cls");
+				
+				(*nOperations)--;
 				printf("O elemento foi retirado\n");
 				printf("Id - (%d)\n",(*auxOp).id);
 				printf("Machine - (");
@@ -374,7 +379,7 @@ void determineShortestTime(operation *op) {
 		puts("Nenhum dado");
 	}
 	else {
-		printf("Quantidade minima de unidades de tempo necessarias para completar o job pela ordem:\n");
+		printf("Quantidade minima de unidades de tempo necessarias para completar o job:\n");
 		while((*op).next != NULL) { 
 			min = 99999;
 			for (j = 0; j < (*op).quantMachines; ++j) {
@@ -404,7 +409,7 @@ void determineLongestTime(operation *op) {
 		puts("Nenhum dado");
 	}
 	else {
-		printf("Quantidade maxima de unidades de tempo necessarias para completar o job pela ordem:\n");
+		printf("Quantidade maxima de unidades de tempo necessarias para completar o job:\n");
 		while((*op).next != NULL) { 
 			max = 0;
 			for (j = 0; j < (*op).quantMachines; ++j) {

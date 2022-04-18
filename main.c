@@ -20,11 +20,11 @@ int main(int argc, char const *argv[]) {
         switch(opcao) {
             case 0: printf("Goodbye!!\n\n"); 
 					break;
-            case 1: insertNewOperation(jobList->op,&idCont); 
+            case 1: insertNewOperation(jobList->op,&idCont,&(jobList->nOperations)); 
 					break;
             case 2: listOperation(jobList->op,jobList->nOperations); 
 					break;
-            case 3: removeOperation(&jobList);
+            case 3: removeOperation(&jobList,&(jobList->nOperations));
 					break;
             case 4: editOperation(jobList->op);
 					break;
@@ -37,5 +37,7 @@ int main(int argc, char const *argv[]) {
         }
     }while(opcao != 0);
 
+    free(jobList->op);
+    free(jobList);
     return 0;
 }
