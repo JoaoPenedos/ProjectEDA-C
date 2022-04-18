@@ -39,12 +39,14 @@ operation *inicializarOperation();
 void verificarDadosNoFicheiro(operation *op, int *idCont, int *nOperations);
 void menu(int *opcao);
 void insertNewOperation(operation *op, int *idCont, int *nOperations);
-void listOperation(operation *op, int nOperations);
+void listNode(operation *op);
+void listOperations(operation *op, int nOperations);
 void removeOperation(job **jobList, int *nOperations);
 void editOperation(operation *op);
 void determineShortestTime(operation *op);
 void determineLongestTime(operation *op);
 void determineAverageTime(operation *op);
+void guardarDadosNoFicheiro(operation *op);
 #pragma endregion
 
 #endif

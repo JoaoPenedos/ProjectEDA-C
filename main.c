@@ -13,6 +13,7 @@ int main(int argc, char const *argv[]) {
     
     jobList = inicializarJob();
 	verificarDadosNoFicheiro(jobList->op,&idCont,&(jobList->nOperations));
+    listOperations(jobList->op,jobList->nOperations); 
 
     do {
         menu(&opcao);
@@ -22,7 +23,7 @@ int main(int argc, char const *argv[]) {
 					break;
             case 1: insertNewOperation(jobList->op,&idCont,&(jobList->nOperations)); 
 					break;
-            case 2: listOperation(jobList->op,jobList->nOperations); 
+            case 2: listOperations(jobList->op,jobList->nOperations); 
 					break;
             case 3: removeOperation(&jobList,&(jobList->nOperations));
 					break;
@@ -36,6 +37,8 @@ int main(int argc, char const *argv[]) {
             		break;
         }
     }while(opcao != 0);
+
+	guardarDadosNoFicheiro(jobList->op);
 
     free(jobList->op);
     free(jobList);
