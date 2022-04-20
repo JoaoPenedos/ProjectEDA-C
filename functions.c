@@ -1,3 +1,12 @@
+/**
+ * @file functions.c
+ * @author João Penedos
+ * @brief
+ * @version 0.9
+ * 
+ * @copyright Copyright (c) 2022 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -5,13 +14,19 @@
 #include <errno.h>
 #include "header.h"
 
+#ifdef _WIN32
+#include <Windows.h>
+#else
+#include <unistd.h>
+#endif
+
 job *inicializarJob() {
 	job *p;
 	p = (job *) malloc( sizeof(job));
 	
 	if(p==NULL) {
 		system("cls");
-		printf("E impossivel criar a estrutura\n\n");
+		printf("Can't create list\n\n");
 		system("pause");
 		return(NULL);
 	}
@@ -28,7 +43,7 @@ operation *inicializarOperation() {
 	
 	if(p==NULL) {
 		system("cls");
-		printf("E impossivel criar a lista\n\n");
+		printf("Can't create list\n\n");
 		system("pause");
 		return(NULL);
 	}
@@ -39,7 +54,7 @@ operation *inicializarOperation() {
 	}
 }
 //#####################################################################################################
-void verificarDadosNoFicheiro(operation *op, int *idCont, int *nOperations) {
+void checkDataInFile(operation *op, int *idCont, int *nOperations) {
 	operation *opP;
 	FILE *f_JOB = fopen("dados.txt","r");
 	char symb ;
@@ -106,7 +121,7 @@ void insertNewOperation(operation *op, int *idCont, int *nOperations) {
 	
 	system("cls");
 	if(auxOp==NULL) { 
-		printf("Nao existe mais espaço em memoria. E impossivel inserir\n\n");
+		printf("There is no more memory space. It is impossible to insert\n\n");
 		system("pause");
 	}
 	else {
@@ -121,19 +136,19 @@ void insertNewOperation(operation *op, int *idCont, int *nOperations) {
 		(*nOperations)++;
 		(*idCont)++;
 		(*op).id = (*idCont);
-		printf("Quantas maquinas vao poder ser utilizadas para esta operacao: ");
+		printf("How many machines can be used for this operation: ");
 		fgets(input, sizeof(input), stdin);
 		(*op).quantMachines = strtol(input, NULL, 0);
 		(*op).machineAndTime = (int *)malloc(sizeof(int[2][(*op).quantMachines]));
 		for (i = 0; i < 2; ++i) {
 			for (j = 0; j < (*op).quantMachines; ++j) {
 				if(i==0) {
-					printf("Qual o id da maquina que pertende usar: ");
+					printf("What is the id of the machine you want to use: ");
 					fgets(input, sizeof(input), stdin);
 					(*op).machineAndTime[i*(*op).quantMachines + j] = strtol(input, NULL, 10);
 				}
 				else {
-					printf("Qual o tempo que a %d maquina vai demorar: ", (*op).machineAndTime[0*(*op).quantMachines + j]);
+					printf("How long will machine %d take: ", (*op).machineAndTime[0*(*op).quantMachines + j]);
 					fgets(input, sizeof(input), stdin);
 					(*op).machineAndTime[i*(*op).quantMachines + j] = strtol(input, NULL, 10);
 				}
@@ -171,7 +186,7 @@ void listOperations(operation *op, int nOperations) {
 	system("cls");
 
 	if((*op).next==NULL) {
-		puts("Nenhum");
+		printf("No operations in the list");
 	}
 	else {
 		printf("This job has %d operations\n", nOperations);
@@ -194,10 +209,10 @@ void removeOperation(job **jobList, int *nOperations) {
 	y=(*jobList)->op;
 	
 	if(((*y).next)==NULL) { 
-		printf("A lista nao tem dados"); 
+		printf("No operations in the list"); 
 	}
 	else {
-		printf("Diga o codigo cujo operacao quer retirar?\n");
+		printf("What is the code whose operation you want to remove?\n");
 		if(fgets(elemRetirar, sizeof(elemRetirar), stdin)) {
 			elemRetirar[strcspn(elemRetirar, "\n")] = 0;
 			intElemRetirar = strtol(elemRetirar, NULL, 0);
@@ -207,7 +222,7 @@ void removeOperation(job **jobList, int *nOperations) {
 			system ("cls");
 			
 			(*nOperations)--;
-			printf("O elemento foi retirado\n");
+			printf("The element has been removed\n");
 			x = (*jobList)->op;
 			listNode(x);
 			system("pause");
@@ -227,15 +242,15 @@ void removeOperation(job **jobList, int *nOperations) {
 				system ("cls");
 				
 				(*nOperations)--;
-				printf("O elemento foi retirado\n");
-				x = (*jobList)->op;
+				printf("The element has been removed\n");
+				x = auxOp;
 				listNode(x);
 				system("pause");
 				free(auxOp);
 			}
 			else {
 				system("cls"); 
-				printf("O elemento com o codigo %s nao existe na lista", elemRetirar);
+				printf("The element with code %s does not exist in the list", elemRetirar);
 			}
 		}
 	}
@@ -249,10 +264,10 @@ void editOperation(operation *operationList) {
 	system("cls");
 	
 	if(((*operationList).next) == NULL) { 
-		printf("A lista nao tem dados"); 
+		printf("No operations in the list"); 
 	}
 	else {
-		printf("Diga o codigo cuja operacao quer editar?\n");
+		printf("What is the code whose operation you want to edit?\n");
 		if(fgets(elemEditar, sizeof(elemEditar), stdin)) {
 			elemEditar[strcspn(elemEditar, "\n")] = 0;
 			intElemEditar = strtol(elemEditar, NULL, 0);
@@ -260,7 +275,7 @@ void editOperation(operation *operationList) {
 
 		if(intElemEditar == (*operationList).id) {
 			system ("cls");
-			printf("O elemento a editar\n");
+			printf("Element to edit\n");
 			printf("Id - (%d)\n",(*operationList).id);
 			printf("Machine Quant. - (%d)\nMachine - (",(*operationList).quantMachines);
 			for (j = 0; j < (*operationList).quantMachines; ++j) {
@@ -281,19 +296,19 @@ void editOperation(operation *operationList) {
 			// listNode(x);
 			free((*operationList).machineAndTime);
 
-			printf("Quantas maquinas vao poder ser utilizadas para esta operacao: ");
+			printf("How many machines can be used for this operation: ");
 			fgets(input, sizeof(input), stdin);
 			(*operationList).quantMachines = strtol(input, NULL, 0);
 			(*operationList).machineAndTime = (int *)malloc(sizeof(int[2][(*operationList).quantMachines]));
 			for (i = 0; i < 2; ++i) {
 				for (j = 0; j < (*operationList).quantMachines; ++j) {
 					if(i==0) {
-						printf("Qual o id da maquina que pertende usar: ");
+						printf("What is the id of the machine you want to use: ");
 						fgets(input, sizeof(input), stdin);
 						(*operationList).machineAndTime[i*(*operationList).quantMachines + j] = strtol(input, NULL, 10);
 					}
 					else {
-						printf("Qual o tempo que a %d maquina vai demorar: ", (*operationList).machineAndTime[0*(*operationList).quantMachines + j]);
+						printf("How long will machine %d take: ", (*operationList).machineAndTime[0*(*operationList).quantMachines + j]);
 						fgets(input, sizeof(input), stdin);
 						(*operationList).machineAndTime[i*(*operationList).quantMachines + j] = strtol(input, NULL, 10);
 					}
@@ -301,14 +316,13 @@ void editOperation(operation *operationList) {
 			}
 		}
 		else {
-			auxOp=operationList;
 			while((intElemEditar != (*operationList).id) && (*operationList).next != NULL) {
 				operationList = (*operationList).next;
 			}
 			
 			if(intElemEditar == (*operationList).id) {
 				system ("cls");
-				printf("O elemento a editar\n");
+				printf("Element to edit\n");
 				printf("Id - (%d)\n",(*operationList).id);
 				printf("Machine Quant. - (%d)\nMachine - (",(*operationList).quantMachines);
 				for (j = 0; j < (*operationList).quantMachines; ++j) {
@@ -329,29 +343,28 @@ void editOperation(operation *operationList) {
 				// listNode(x);
 				free((*operationList).machineAndTime);
 
-				printf("Quantas maquinas vao poder ser utilizadas para esta operacao: ");
+				printf("How many machines can be used for this operation: ");
 				fgets(input, sizeof(input), stdin);
 				(*operationList).quantMachines = strtol(input, NULL, 0);
 				(*operationList).machineAndTime = (int *)malloc(sizeof(int[2][(*operationList).quantMachines]));
 				for (i = 0; i < 2; ++i) {
 					for (j = 0; j < (*operationList).quantMachines; ++j) {
 						if(i==0) {
-							printf("Qual o id da maquina que pertende usar: ");
+							printf("What is the id of the machine you want to use: ");
 							fgets(input, sizeof(input), stdin);
 							(*operationList).machineAndTime[i*(*operationList).quantMachines + j] = strtol(input, NULL, 10);
 						}
 						else {
-							printf("Qual o tempo que a %d maquina vai demorar: ", (*operationList).machineAndTime[0*(*operationList).quantMachines + j]);
+							printf("How long will machine %d take: ", (*operationList).machineAndTime[0*(*operationList).quantMachines + j]);
 							fgets(input, sizeof(input), stdin);
 							(*operationList).machineAndTime[i*(*operationList).quantMachines + j] = strtol(input, NULL, 10);
 						}
 					}
 				}
-				operationList = auxOp;
 			}
 			else {
 				system("cls"); 
-				printf("O elemento com o codigo %s nao existe na lista", elemEditar);
+				printf("The element with code %s does not exist in the list", elemEditar);
 			}
 		}
 	}
@@ -362,10 +375,10 @@ void determineShortestTime(operation *op) {
 
 	system("cls");
 	if((*op).next==NULL) {
-		puts("Nenhum dado");
+		printf("No operations in the list");
 	}
 	else {
-		printf("Quantidade minima de unidades de tempo necessarias para completar o job:\n");
+		printf("Machines used to obtain the shortest result\n");
 		while((*op).next != NULL) { 
 			min = 99999;
 			for (j = 0; j < (*op).quantMachines; ++j) {
@@ -381,7 +394,7 @@ void determineShortestTime(operation *op) {
 			soma = soma + min;
 			op=(*op).next;
 		}
-		printf("\nShortest Time: %d", soma);
+		printf("\nMinimum number of time units needed to complete the job: %d", soma);
 	}
 	printf("\n\n");
 	system("pause");
@@ -392,10 +405,10 @@ void determineLongestTime(operation *op) {
 
 	system("cls");
 	if((*op).next==NULL) {
-		puts("Nenhum dado");
+		printf("No operations in the list");
 	}
 	else {
-		printf("Quantidade maxima de unidades de tempo necessarias para completar o job:\n");
+		printf("Machines used to obtain the longest result\n");
 		while((*op).next != NULL) { 
 			max = 0;
 			for (j = 0; j < (*op).quantMachines; ++j) {
@@ -411,21 +424,25 @@ void determineLongestTime(operation *op) {
 			soma = soma + max;
 			op=(*op).next;
 		}
-		printf("\nLongest Time: %d", soma);
+		printf("\nMaximum number of time units needed to complete the job: %d", soma);
 	}
 	printf("\n\n");
 	system("pause");
 }
 //#####################################################################################################
-void determineAverageTime(operation *op) {}
+void determineAverageTime(operation *op) {
+	// nested loops com quantidades diferentes baseado 
+	// na quantidade de opercoes do joe e tamanhos (de loop) diferentes 
+	// baseados nas quantidades de maquinas de cada operacao
+}
 //#####################################################################################################
-void guardarDadosNoFicheiro(operation *op) {
+void saveDataInFile(operation *op) {
 	FILE *f_JOB = fopen("dados.txt","w");
 	int j;
 
     if(f_JOB != NULL) {
 		if((*op).next==NULL) {
-			puts("Nenhum dado para colocar no ficheiro");
+			printf("No data to put in the file");
 		}
 		else {
 			while((*op).next != NULL) {
@@ -448,7 +465,7 @@ void guardarDadosNoFicheiro(operation *op) {
 				op=(*op).next;
 			}
 		}
-		printf("Lista de Jobs e Operacoes foi carregada no ficheiro (dados.txt) com sucesso!!\n");
+		printf("List of Jobs and Operations was successfully loaded into the file (dados.txt)!!\n");
 	}
 
     fclose(f_JOB);
@@ -477,12 +494,12 @@ void menu(int *opcao) {
 		errno = 0; // reset error number
 		(*opcao) = strtol(buf, &endptr, 10);
 		if (errno == ERANGE) {
-			printf("O numero inserido e muito grande ou demasiado pequeno.\n\n");
+			printf("The number entered is either too large or too small.\n\n");
 			system("pause");
 			success = 0;
 		}
 		else if (((*opcao) > 7) || ((*opcao) < 0)) {
-			printf("Por favor insira um numero entre 0 e 7.\n\n");
+			printf("Please enter a number between 0 and 7.\n\n");
 			system("pause");
 			success = 0;
 		}
