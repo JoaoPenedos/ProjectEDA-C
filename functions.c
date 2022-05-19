@@ -74,7 +74,7 @@ operationList *newOperationNode() {
 int yesNo() {
 	char buf[1024];
 
-	while(1) {
+	while(TRUE) {
 		printf("Yes or No (Y - y or N - n): ");
 
 		if(!fgets(buf, sizeof(buf), stdin)) {
@@ -442,11 +442,7 @@ jobList *findJob(jobList *auxjbL) {
 		return NULL;
 	}
 	else {
-		printf("What is the id whose job you want to find?\n");
-		if(fgets(elemFind, sizeof(elemFind), stdin)) {
-			elemFind[strcspn(elemFind, "\n")] = 0;
-			intElemFind = strtol(elemFind, NULL, 0);
-		}
+		intElemFind = askUserIntegers("What is the id whose job you want to find?\n");
 
 		jobToFind = findJobInTree(auxjbL,intElemFind);
 		if(jobToFind != NULL)
@@ -525,15 +521,11 @@ int searchEqualMachine(operation m, int elemToFind, int currentPosition) {
  * @param op is a pointer to a struct operation
  */
 operation readOperation(operation *op) {
-	char *input;
+	char *input, *str;
 	int i, j, check;
-	
-	printf("How many machines can be used for this operation: ");
-	if(fgets(input, sizeof(input), stdin)){
-		input[strcspn(input, "\n")] = 0;
-	}
 
-	op->quantMachines = strtol(input, NULL, 0);
+	op->quantMachines = askUserIntegers("How many machines can be used for this operation: ");
+
 	op->machineAndTime = (int *)malloc(sizeof(int[2][op->quantMachines]));
 	for (i = 0; i < 2; i++) {
 		for (j = 0; j < op->quantMachines; j++) {
@@ -541,11 +533,7 @@ operation readOperation(operation *op) {
 				do {
 					if( j > 0) {
 						check = 0;
-						printf("What is the id of the machine you want to use: ");
-						if(fgets(input, sizeof(input), stdin)){
-							input[strcspn(input, "\n")] = 0;
-						}
-						op->machineAndTime[i*op->quantMachines + j] = strtol(input, NULL, 10);
+						op->machineAndTime[i*op->quantMachines + j] = askUserIntegers("What is the id of the machine you want to use: ");
 
 						check = searchEqualMachine((*op),op->machineAndTime[i*op->quantMachines + j],j);
 						if(check == 0) {
@@ -554,18 +542,13 @@ operation readOperation(operation *op) {
 					}
 					else {
 						check = 1;
-						printf("What is the id of the machine you want to use: ");
-						if(fgets(input, sizeof(input), stdin)){
-							input[strcspn(input, "\n")] = 0;
-						}
-						op->machineAndTime[i*op->quantMachines + j] = strtol(input, NULL, 10);
+						op->machineAndTime[i*op->quantMachines + j] = askUserIntegers("What is the id of the machine you want to use: ");
 					}
 				}while(check == 0);
 			}
-			else {
-				printf("How long will machine %d take: ", op->machineAndTime[0*op->quantMachines + j]);
-				fgets(input, sizeof(input), stdin);
-				op->machineAndTime[i*op->quantMachines + j] = strtol(input, NULL, 10);
+			else {				
+				sprintf(str, "How long will machine %d take: ", op->machineAndTime[0*op->quantMachines + j]);
+				op->machineAndTime[i*op->quantMachines + j] = askUserIntegers(str);
 			}
 		}
 	}
@@ -642,11 +625,7 @@ void removeOperation(operationList *opL, int *nOperations) {
 		printf("No operations in the list"); 
 	}
 	else {
-		printf("What is the code whose operation you want to remove?\n");
-		if(fgets(elemRetirar, sizeof(elemRetirar), stdin)) {
-			elemRetirar[strcspn(elemRetirar, "\n")] = 0;
-			intElemRetirar = strtol(elemRetirar, NULL, 0);
-		}
+		intElemRetirar = askUserIntegers("What is the code whose operation you want to remove?\n");
 
 		if(intElemRetirar == opL->op.id) {
 			system ("cls");
@@ -701,11 +680,7 @@ void editOperation(operationList *opL) {
 		printf("No operations in the list"); 
 	}
 	else {
-		printf("What is the code whose operation you want to edit?\n");
-		if(fgets(elemEditar, sizeof(elemEditar), stdin)) {
-			elemEditar[strcspn(elemEditar, "\n")] = 0;
-			intElemEditar = strtol(elemEditar, NULL, 0);
-		}
+		intElemEditar = askUserIntegers("What is the code whose operation you want to edit?\n");
 
 		if(intElemEditar == opL->op.id) {
 			system ("cls");
@@ -836,11 +811,7 @@ void removeJob(jobList **jbL) {
 		printf("No operations in the list"); 
 	}
 	else {
-		printf("What is the code whose operation you want to remove?\n");
-		if(fgets(elemRetirar, sizeof(elemRetirar), stdin)) {
-			elemRetirar[strcspn(elemRetirar, "\n")] = 0;
-			intElemRetirar = strtol(elemRetirar, NULL, 0);
-		}
+		intElemRetirar = askUserIntegers("What is the code whose job you want to remove?\n");
 
 		(*jbL) = deleteNode((*jbL),intElemRetirar,intElemRetirar,&success);
 		
@@ -1002,6 +973,49 @@ void deallocate(jobList *root) {
     deallocate(root->left);
 
     free(root);
+}
+/**
+ * @brief It asks the user for an integer, and if the user enters a non-integer, it asks the user to try
+ * again.
+ * 
+ * @param textToAsk The text to ask the user.
+ * 
+ * @return the inputConverted variable.
+ */
+int askUserIntegers(char *textToAsk) {
+	int i, success, inputConverted;
+	char *endptr, buf[1024];
+	
+	do {
+		success = 0;
+		printf("%s",textToAsk);
+
+		if(!fgets(buf, sizeof(buf), stdin)) {
+			printf("Something went wrong try again\n\n");
+            printf("Error: %d\n", errno);
+			system("pause");
+		}
+		errno = 0; // reset error number
+		inputConverted = strtol(buf, &endptr, 10);
+		if(errno == EINVAL) {
+            printf("Conversion error occurred: %d\n", errno);
+            exit(0);
+        }
+		if(errno == ERANGE) {
+			printf("The number entered is either too large or too small.\n\n");
+		}
+		else if (endptr == buf)	{
+			// no character was read.
+			printf("No character was read.\n");
+		}
+		else if ((*endptr) && (*endptr != '\n')) {
+			// *endptr is neither end of string nor newline, so we didn't convert the *whole* input.
+			printf("No character was read.\n");
+		}
+		else {
+			return inputConverted;
+		}
+	}while(TRUE);
 }
 /**
  * @brief It's a function that displays a main menu and gets the user's input

@@ -56,6 +56,8 @@ typedef struct jobList {
 void menu(int *option);
 void menuEditJob(int *optionEditJob);
 
+int askUserIntegers(char *textToAsk);
+
 void iniJb(job *jb);
 void iniOp(operation *op);
 
