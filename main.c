@@ -22,43 +22,78 @@
 #include <unistd.h>
 #endif
 
-int main(int argc, char const *argv[]) {
-    job *jobList;
-    int opcao, idCont = 0;
+int main() {
+    jobList *jbL = NULL, *jobToFind;
+    int option, optionEditJob, idContJob = 0;
     
-    jobList = inicializarJob(); // inicializar a lista
-	checkDataInFile(jobList->op,&idCont,&(jobList->nOperations)); // verificar dados no ficheiro
-    listOperations(jobList->op,jobList->nOperations); // listar as opercoes da lista
+    system("cls");
+	jbL = checkDataInFile(jbL,&idContJob);
+
+    // printJobTreeByLevel(jbL, 0);
+    // ListJobTreeInOrder(jbL);
+    // system("pause");
 
     do {
-        menu(&opcao);
+        menu(&option);
 
-        switch(opcao) {
+        switch(option) {
+            default:
             case 0: printf("Goodbye!!\n\n");
 					break;
-            case 1: insertNewOperation(jobList->op,&idCont,&(jobList->nOperations)); 
-					break; // inserir nova opercao
-            case 2: listOperations(jobList->op,jobList->nOperations); 
-					break; // listar as opercoes da lista
-            case 3: removeOperation(&jobList,&(jobList->nOperations));
-					break; // remover opercao da lista
-            case 4: editOperation(jobList->op);
-					break; // editar as operacoes da lista
-            case 5: determineShortestTime(jobList->op);
-					break; // determinar o tempo mais curto
-            case 6: determineLongestTime(jobList->op);
-					break; // determinar o tempo mais longo
-            case 7: determineAverageTime(jobList->op);
-            		break; // determinar o tempo medio de todas as possibilidades
+            case 1: system("cls");
+                    ListJobTreeInOrder(jbL);
+                    system("pause");
+					break;
+            case 2: system("cls");
+                    printJobTreeByLevel(jbL,0);
+                    system("pause");
+					break;
+            case 3: jobToFind = findJob(jbL);
+                    system("pause");
+			        break;
+            case 4: insertJob(&jbL,&idContJob);
+					break;
+            case 5: removeJob(&jbL);
+                    system("pause");
+					break;
+            case 6: jobToFind = findJob(jbL);
+                    system("pause");
+                    do {
+                        menuEditJob(&optionEditJob);
+                        switch(optionEditJob) {
+                            default:
+                            case 0: break;
+                            case 1: listOperations(jobToFind->opL); 
+                                    system("pause"); 
+                                    break;
+                            case 2: insertOperationNode(jobToFind->opL,&(jobToFind->jb.nOperations));
+                                    system("pause");
+                                    break;
+                            case 3: removeOperation(jobToFind->opL,&(jobToFind->jb.nOperations));
+                                    system("pause");
+                                    break;
+                            case 4: editOperation(jobToFind->opL);
+                                    system("pause");
+                                    break;
+                        }
+                    }while(optionEditJob != 0);
+					break;
+            case 7: calcEscalationProposal(jbL);
+					break;
+            case 8: determineAverageTime(jbL);
+                    system("pause");
+					break;
         }
-    }while(opcao != 0);
+    }while(option != 0);
+    
+    saveDataYN(jbL);
 
-    saveDataInFile(jobList->op); // salvar as mudanças da lista no ficheiro
-
-    while((jobList->op) != NULL) {
-        free(jobList->op);
-        jobList->op = jobList->op->next;
-    }
-    free(jobList);
+    deallocate(jbL); 
+    
     return 0;
 }
+
+// case 5: determineShortestTime(jbL->op);
+//         break;
+// case 6: determineLongestTime(jbL->op);
+//         break;

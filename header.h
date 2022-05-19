@@ -22,40 +22,91 @@
 #include <unistd.h>
 #endif
 
-#pragma region Structs 
+#pragma region Structs
 
-//-------------------------------------------------------
 typedef struct operation {
     int id;
-    int quantMachines;      // quantidade de maquinas que podem ser usadas
-    int *machineAndTime;    // 2d array para guardar as maquinas e os respetivos tempos
-    struct operation *next; // apontador para a proxima operacao
+    int quantMachines;
+    int *machineAndTime;
 }operation;
-//-------------------------------------------------------
+
+typedef struct operationList {
+    operation op;
+    struct operationList *next;
+}operationList;
+
 typedef struct job {
-    //int id;
-    int nOperations;        // quantidade de operacoes no job
-    operation *op;          // apontador para o inicio da lista de operacoes
-    //struct job *next;     // apontador para o proximo job
+    int id;
+    int nOperations;
+    int height;
 }job;
 
+typedef struct jobList {
+    job jb;
+    operationList *opL;
+    struct jobList *left;
+    struct jobList *right;
+}jobList;
+
 #pragma endregion
-//#####################################################################################################
-//#####################################################################################################
+
+
 #pragma region Signatures
-job *inicializarJob();
-operation *inicializarOperation();
-void checkDataInFile(operation *op, int *idCont, int *nOperations);
-void menu(int *opcao);
-void insertNewOperation(operation *op, int *idCont, int *nOperations);
-void listNode(operation *op);
-void listOperations(operation *op, int nOperations);
-void removeOperation(job **jobList, int *nOperations);
-void editOperation(operation *op);
-void determineShortestTime(operation *op);
-void determineLongestTime(operation *op);
-void determineAverageTime(operation *op);
-void saveDataInFile(operation *op);
+
+void menu(int *option);
+void menuEditJob(int *optionEditJob);
+
+void iniJb(job *jb);
+void iniOp(operation *op);
+
+jobList *newJobNode(int key);
+operationList *newOperationNode();
+
+int maximum(int a, int b);
+int height(jobList *N);
+int getBalance(jobList *N);
+jobList *rightRotate(jobList *y);
+jobList *leftRotate(jobList *x);
+jobList *minValueNode(jobList *node);
+
+jobList *insertNode(jobList *node, int key, jobList **nodePointer);
+jobList *insertJob(jobList **jbL,int *idContJob);
+
+jobList *deleteNode(jobList *root, int key, int originalKey, int *success);
+void removeJob(jobList **jbL);
+
+void createOperationFromFile(operationList *opL, int idOp, int cont, int arrM[], int arrT[]);
+jobList *checkDataInFile(jobList *jbL, int *idContJob);
+
+void printJobTreeByLevel(jobList *root, int level);
+
+void listOperationNode(operation op);
+void listOperations(operationList *auxOpL);
+void listJobNode(operationList *auxOpL, job jb);
+void ListJobTreeInOrder(jobList *n);
+
+jobList *findJobInTree(jobList *root, int key) ;
+jobList *findJob(jobList *auxjbL);
+
+// void calcEscalationProposal(job *jobList);
+
+int searchEqualMachine(operation m, int elemToFind, int currentPosition);
+operation readOperation(operation *op);
+void insertOperationNode(operationList *op, int *nOperations);
+void removeOperation(operationList *opL, int *nOperations);
+void editOperation(operationList *opL);
+
+// void determineShortestTime(operation *op);
+// void determineLongestTime(operation *op);
+void determineAverageTime(jobList *jbL);
+void determineAverageTimeOfAllPossibilities(operationList *opL,int *id, int soma, float *media, int currentQuantMachines, int currentPosition);
+
+void writeInFile(operationList *opL, int id, FILE *f_JOB);
+void saveDataInFile(jobList *jbL);
+void orderTreeToSaveInFile(jobList *n, FILE *f_JOB);
+void saveDataYN(jobList *jbL);
+
+void deallocate(jobList *root);
 #pragma endregion
 
 #endif
