@@ -7,46 +7,48 @@
  * @copyright Copyright (c) 2022 
  */
 
-#ifndef DATA
-#define DATA
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <conio.h>
-#include <errno.h>
-
-#ifdef _WIN32
-#include <Windows.h>
-#else
-#include <unistd.h>
-#endif
+#ifndef _HEADER
+#define _HEADER
 
 #pragma region Structs
 
 typedef struct operation {
-    int id;
-    int quantMachines;
-    int *machineAndTime;
+	int id;
+	int quantMachines;
+	int *machineAndTime;
 }operation;
 
 typedef struct operationList {
-    operation op;
-    struct operationList *next;
+	operation op;
+	struct operationList *next;
 }operationList;
 
 typedef struct job {
-    int id;
-    int nOperations;
-    int height;
+	int id;
+	int nOperations;
+	int height;
 }job;
 
 typedef struct jobList {
-    job jb;
-    operationList *opL;
-    struct jobList *left;
-    struct jobList *right;
+	job jb;
+	operationList *opL;
+	struct jobList *left;
+	struct jobList *right;
 }jobList;
+
+// typedef struct operationList {
+//     int id;
+//     char **proposta;
+// }operationList;
+
+#pragma endregion
+
+
+#pragma region Definitions	
+
+#define _ARRAY_MACHINES_TIMES 2
+#define _MACHINES 0
+#define _TIMES 1
 
 #pragma endregion
 
@@ -98,10 +100,10 @@ void insertOperationNode(operationList *op, int *nOperations);
 void removeOperation(operationList *opL, int *nOperations);
 void editOperation(operationList *opL);
 
-// void determineShortestTime(operation *op);
-// void determineLongestTime(operation *op);
-void determineAverageTime(jobList *jbL);
-void determineAverageTimeOfAllPossibilities(operationList *opL,int *id, int soma, float *media, int currentQuantMachines, int currentPosition);
+void determineShortestTime(operationList *opL);
+void determineLongestTime(operationList *opL);
+void determineAverageTime(operationList *opL);
+void determineAverageTimeOfAllPossibilities(operationList *opL,int *id, int soma, float *media);
 
 void writeInFile(operationList *opL, int id, FILE *f_JOB);
 void saveDataInFile(jobList *jbL);

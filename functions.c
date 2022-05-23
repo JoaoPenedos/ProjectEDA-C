@@ -13,6 +13,7 @@
 #include <conio.h>
 #include <errno.h>
 #include "header.h"
+#include "colors.h"
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -31,7 +32,7 @@ jobList *newJobNode(int key) {
 	jobList *node = (jobList *) malloc(sizeof(jobList));
 	if(node==NULL) {
 		system("cls");
-		printf("Can't create tree or branch\n\n");
+		printf(_FG_RED"Can't create tree or branch"_RESET"\n\n");
 		system("pause");
 		return(NULL);
 	}
@@ -56,7 +57,7 @@ operationList *newOperationNode() {
 	
 	if(p==NULL) {
 		system("cls");
-		printf("Can't create list\n\n");
+		printf(_FG_RED"Can't create list"_RESET"\n\n");
 		system("pause");
 		return(NULL);
 	}
@@ -75,11 +76,11 @@ int yesNo() {
 	char buf[1024];
 
 	while(TRUE) {
-		printf("Yes or No (Y - y or N - n): ");
+		printf(_FG_YELLOW"Yes or No (Y - y or N - n): "_RESET);
 
 		if(!fgets(buf, sizeof(buf), stdin)) {
 			printf("Something went wrong try again\n\n");
-            printf("Error: %d\n", errno);
+			printf("Error: %d\n", errno);
 			system("pause");
 		}
 		errno = 0;
@@ -87,14 +88,14 @@ int yesNo() {
 		strlwr(buf);
 
 		if(errno == EINVAL) {
-            printf("Conversion error occurred: %d\n", errno);
-            exit(0);
-        }
+			printf(_FG_RED"Conversion error occurred: %d"_RESET"\n", errno);
+			exit(0);
+		}
 		if(errno == ERANGE) {
-			printf("The option entered is either too large or too small.\n\n");
+			printf(_FG_RED"The option entered is either too large or too small."_RESET"\n\n");
 		}
 		else if((strcmp(buf,"yes") != 0) && (strcmp(buf,"y") != 0) && (strcmp(buf,"no") != 0) && (strcmp(buf,"n") != 0)) {
-			printf("Please enter a Yes or No (Y - y or N - n).\n\n");
+			printf(_FG_RED"Please enter a Yes or No (Y - y or N - n)."_RESET"\n\n");
 		}
 		else if((strcmp(buf,"yes") == 0) || (strcmp(buf,"y") == 0)) {
 			return 1;
@@ -125,7 +126,7 @@ int height(jobList *node) {
  * @return The maximum of the two numbers.
  */
 int maximum(int a, int b) {
- 	return (a > b) ? a : b;
+	return (a > b) ? a : b;
 }
 /**
  * @brief It rotates the tree to the right.
@@ -221,10 +222,10 @@ void createOperationFromFile(operationList *opL, int idOp, int nMachines, int ar
 	iniOp(&auxOp);
 	auxOp.id = idOp;
 	auxOp.quantMachines = nMachines;
-	auxOp.machineAndTime = (int *)malloc(sizeof(int[2][auxOp.quantMachines]));
+	auxOp.machineAndTime = (int *)malloc(sizeof(int[_ARRAY_MACHINES_TIMES][auxOp.quantMachines]));
 	for(i=0; i < auxOp.quantMachines; i++) {
-		auxOp.machineAndTime[0*auxOp.quantMachines + i] = arrM[i];
-		auxOp.machineAndTime[1*auxOp.quantMachines + i] = arrT[i];
+		auxOp.machineAndTime[_MACHINES*auxOp.quantMachines + i] = arrM[i];
+		auxOp.machineAndTime[_TIMES*auxOp.quantMachines + i] = arrT[i];
 	}
 	opL->op = auxOp;
 	opL->next = pOpL;
@@ -253,7 +254,7 @@ jobList *checkDataInFile(jobList *jbL, int *idContJob) {
 	int i = 0, cont = 0, arrayM[100], arrayT[100], digitCount = 0, iochar, readNumber, idContOp;
 	char simpleBuffer[12];//max 10 int digits + 1 negative sign + 1 null char string....if you read more, then you probably don't    have an int there....
 
-    if(f_JOB != NULL) {
+	if(f_JOB != NULL) {
 		do {
 			i = cont = 0;
 			while (iochar = getc(f_JOB), iochar != '\n' && iochar != EOF) {
@@ -300,7 +301,7 @@ jobList *checkDataInFile(jobList *jbL, int *idContJob) {
 			
 		}while(iochar != EOF);
 	}
-    fclose(f_JOB);
+	fclose(f_JOB);
 
 	return root;
 }
@@ -313,22 +314,22 @@ jobList *checkDataInFile(jobList *jbL, int *idContJob) {
 void listOperationNode(operation op) {
 	int j = 0;
 
-	printf("Id - (%d)\n",op.id);
-	printf("Machine - (");
+	printf(_FG_YELLOW"Id - ("_FG_CYAN"%d"_FG_YELLOW")\n",op.id);
+	printf("Machine - ("_FG_CYAN);
 	for (j = 0; j < op.quantMachines; ++j) {
 		if((op.quantMachines - j) == 1)
-			printf("%d",op.machineAndTime[0*op.quantMachines + j]);
+			printf("%d",op.machineAndTime[_MACHINES*op.quantMachines + j]);
 		else
-			printf("%d,",op.machineAndTime[0*op.quantMachines + j]);
+			printf("%d"_FG_YELLOW","_FG_CYAN,op.machineAndTime[_MACHINES*op.quantMachines + j]);
 	}
-	printf(")\nTime - (");
+	printf(_FG_YELLOW")\nTime - ["_FG_CYAN);
 	for (j = 0; j < op.quantMachines; ++j) {
 		if((op.quantMachines - j) == 1)
-			printf("%d",op.machineAndTime[1*op.quantMachines + j]);
+			printf("%d",op.machineAndTime[_TIMES*op.quantMachines + j]);
 		else
-			printf("%d,",op.machineAndTime[1*op.quantMachines + j]);
+			printf("%d"_FG_YELLOW","_FG_CYAN,op.machineAndTime[_TIMES*op.quantMachines + j]);
 	}
-	printf(")\n\n");
+	printf(_FG_YELLOW"]"_RESET"\n\n");
 
 }
 /**
@@ -351,15 +352,15 @@ void listOperations(operationList *auxOpL) {
 void listJobNode(operationList *auxOpL, job jb) {
 	int i = 0;
 
-	for(i = 0; i < 25; i++) printf("%c",205);
-	printf("\nJOB N%c %d\n",167,jb.id);
+	for(i = 0; i < 25; i++) printf(_FG_GREY"%c",205);
+	printf("\nJOB N%c "_FG_B_CYAN"%d\n"_FG_GREY,167,jb.id);
 
 	if(jb.nOperations > 0) {
-		printf("Operations count: %d\n",jb.nOperations);
+		printf("Operations count: "_FG_B_CYAN"%d"_RESET"\n",jb.nOperations);
 		listOperations(auxOpL);
 	}
 	else {
-		printf("The job has no operations\n\n");
+		printf(_FG_RED"The job has no operations"_RESET"\n\n");
 	}
 }
 /**
@@ -370,12 +371,12 @@ void listJobNode(operationList *auxOpL, job jb) {
  * @return the jobList pointer.
  */
 void ListJobTreeInOrder(jobList *n) {
-    if(n == NULL)
-        return;
+	if(n == NULL)
+		return;
 
-    ListJobTreeInOrder(n->left);
+	ListJobTreeInOrder(n->left);
 	listJobNode(n->opL,n->jb);
-    ListJobTreeInOrder(n->right);
+	ListJobTreeInOrder(n->right);
 }
 /**
  * @brief It prints the tree in a way that makes it easy to see the structure of the tree
@@ -406,19 +407,19 @@ void printJobTreeByLevel(jobList *root, int level) {
  * @return The jobList node that contains the job with the id k.
  */
 jobList *findJobInTree(jobList *root, int k) {
-    if(root == NULL) {
-      	return NULL;
-    } 
+	if(root == NULL) {
+		return NULL;
+	} 
 	else if (root->jb.id == k) {
 		listJobNode(root->opL,root->jb);
-      	return root;
-    } 
+		return root;
+	} 
 	else {
 		jobList* x = findJobInTree(root->left,k);
 		if (x) 
 			return x;         //if we find in left subtree, return result
 		return findJobInTree(root->right,k);
-    }
+	}
 }
 /**
  * @brief It takes a jobList pointer as an argument, asks the user for an id, and returns a jobList pointer to
@@ -437,18 +438,18 @@ jobList *findJob(jobList *auxjbL) {
 	system("cls");
 	
 	if(auxjbL == NULL) { 
-		printf("No jobs in the list");
+		printf(_FG_RED"No jobs in the list\n"_RESET);
 		system("pause");
 		return NULL;
 	}
 	else {
-		intElemFind = askUserIntegers("What is the id whose job you want to find?\n");
+		intElemFind = askUserIntegers(_FG_YELLOW"What is the id whose job you want to find?\n"_RESET);
 
 		jobToFind = findJobInTree(auxjbL,intElemFind);
 		if(jobToFind != NULL)
 			return jobToFind;
 		
-		printf("The job with id %d doesn't exist!\n", intElemFind);
+		printf(_FG_RED"The job with id "_FG_CYAN"%d"_FG_RED" doesn't exist!\n"_RESET, intElemFind);
 		return NULL;
 	}
 }
@@ -512,7 +513,7 @@ int searchEqualMachine(operation m, int elemToFind, int currentPosition) {
 			return 0;
 	}
 
-   return 1;
+return 1;
 }
 /**
  * @brief It reads the number of machines that can be used for an operation, then it reads the id of the
@@ -524,30 +525,30 @@ operation readOperation(operation *op) {
 	char *input, *str;
 	int i, j, check;
 
-	op->quantMachines = askUserIntegers("How many machines can be used for this operation: ");
+	op->quantMachines = askUserIntegers(_FG_YELLOW"How many machines can be used for this operation: "_RESET);
 
-	op->machineAndTime = (int *)malloc(sizeof(int[2][op->quantMachines]));
+	op->machineAndTime = (int *)malloc(sizeof(int[_ARRAY_MACHINES_TIMES][op->quantMachines]));
 	for (i = 0; i < 2; i++) {
 		for (j = 0; j < op->quantMachines; j++) {
 			if(i == 0) {
 				do {
 					if( j > 0) {
 						check = 0;
-						op->machineAndTime[i*op->quantMachines + j] = askUserIntegers("What is the id of the machine you want to use: ");
+						op->machineAndTime[i*op->quantMachines + j] = askUserIntegers(_FG_YELLOW"What is the id of the machine you want to use: "_RESET);
 
 						check = searchEqualMachine((*op),op->machineAndTime[i*op->quantMachines + j],j);
 						if(check == 0) {
-							printf("\nMachine %d already in use!! Chose another\n\n", op->machineAndTime[i*op->quantMachines + j]);
+							printf(_FG_RED"\nMachine "_FG_CYAN"%d"_FG_RED" already in use!! Chose another\n\n"_RESET, op->machineAndTime[i*op->quantMachines + j]);
 						}
 					}
 					else {
 						check = 1;
-						op->machineAndTime[i*op->quantMachines + j] = askUserIntegers("What is the id of the machine you want to use: ");
+						op->machineAndTime[i*op->quantMachines + j] = askUserIntegers(_FG_YELLOW"What is the id of the machine you want to use: "_RESET);
 					}
 				}while(check == 0);
 			}
 			else {				
-				sprintf(str, "How long will machine %d take: ", op->machineAndTime[0*op->quantMachines + j]);
+				sprintf(str, _FG_YELLOW"How long will machine "_FG_CYAN"%d"_FG_YELLOW" take: "_RESET, op->machineAndTime[_MACHINES*op->quantMachines + j]);
 				op->machineAndTime[i*op->quantMachines + j] = askUserIntegers(str);
 			}
 		}
@@ -569,7 +570,7 @@ void insertOperationNode(operationList *op, int *nOperations) {
 	system("cls");
 
 	if(auxOp==NULL) { 
-		printf("There is no more memory space. It is impossible to insert\n\n");
+		printf(_FG_RED"There is no more memory space. It is impossible to insert\n\n"_RESET);
 		system("pause");
 	}
 	else {
@@ -582,7 +583,7 @@ void insertOperationNode(operationList *op, int *nOperations) {
 		op->op.id = id;
 		readOperation(&op->op);
 		op->next = auxOp;
- 	}
+	}
 }
 /**
  * @brief It inserts a job node in a job list, and then asks the user if he wants to add operations to the
@@ -601,7 +602,7 @@ jobList *insertJob(jobList **jbL,int *idContJob) {
 	(*idContJob)++;
 	(*jbL) = insertNode((*jbL), (*idContJob), &currentNode);
 
-	printf("Do you want to add operations to the current added Job node? \n");
+	printf(_FG_CYAN"Do you want to add operations to the current added Job node? \n"_RESET);
 	while (opYN = yesNo(), opYN == 1) {
 		insertOperationNode(currentNode->opL,&(currentNode->jb.nOperations));
 	}
@@ -622,18 +623,17 @@ void removeOperation(operationList *opL, int *nOperations) {
 	y = opL;
 	
 	if((y->next)==NULL) { 
-		printf("No operations in the list"); 
+		printf(_FG_RED"No operations in the list\n"_RESET); 
 	}
 	else {
-		intElemRetirar = askUserIntegers("What is the code whose operation you want to remove?\n");
+		intElemRetirar = askUserIntegers(_FG_YELLOW"What is the code whose operation you want to remove?\n"_RESET);
 
 		if(intElemRetirar == opL->op.id) {
 			system ("cls");
 			
 			(*nOperations)--;
-			printf("The element has been removed\n");
+			printf(_FG_YELLOW"The element has been removed\n"_RESET);
 			listOperationNode(opL->op);
-			system("pause");
 			opL = opL->next;
 			free(y);
 		}
@@ -650,14 +650,13 @@ void removeOperation(operationList *opL, int *nOperations) {
 				system ("cls");
 				
 				(*nOperations)--;
-				printf("The element has been removed\n");
+				printf(_FG_YELLOW"The element has been removed\n"_RESET);
 				listOperationNode(auxOp->op);
-				system("pause");
 				free(auxOp);
 			}
 			else {
-				system("cls"); 
-				printf("The element with code %s does not exist in the list", elemRetirar);
+				system("cls");
+				printf(_FG_RED"The element with code "_FG_CYAN"%d"_FG_RED" does not exist in the list"_RESET, intElemRetirar);
 			}
 		}
 	}
@@ -677,13 +676,14 @@ void editOperation(operationList *opL) {
 	system("cls");
 	
 	if((opL->next) == NULL) { 
-		printf("No operations in the list"); 
+		printf("No operations in the list\n"); 
 	}
 	else {
-		intElemEditar = askUserIntegers("What is the code whose operation you want to edit?\n");
+		intElemEditar = askUserIntegers(_FG_YELLOW"What is the code whose operation you want to edit?\n"_RESET);
 
 		if(intElemEditar == opL->op.id) {
 			system ("cls");
+			printf(_FG_YELLOW"The element being edited\n"_RESET);
 			listOperationNode(opL->op);
 			readOperation(&(opL->op));
 		}
@@ -694,12 +694,13 @@ void editOperation(operationList *opL) {
 			
 			if(intElemEditar == opL->op.id) {
 				system ("cls");
+				printf(_FG_YELLOW"The element being edited\n"_RESET);
 				listOperationNode(opL->op);
 				readOperation(&(opL->op));
 			}
 			else {
-				system("cls"); 
-				printf("The element with code %s does not exist in the list", elemEditar);
+				system("cls");
+				printf(_FG_RED"The element with code "_FG_CYAN"%d"_FG_RED" does not exist in the list"_RESET, intElemEditar);
 			}
 		}
 	}
@@ -808,21 +809,87 @@ void removeJob(jobList **jbL) {
 	system("cls");
 	
 	if((*jbL) == NULL) { 
-		printf("No operations in the list"); 
+		printf(_FG_RED"No operations in the list\n"_RESET); 
 	}
 	else {
-		intElemRetirar = askUserIntegers("What is the code whose job you want to remove?\n");
+		intElemRetirar = askUserIntegers(_FG_YELLOW"What is the code whose job you want to remove?\n"_RESET);
 
 		(*jbL) = deleteNode((*jbL),intElemRetirar,intElemRetirar,&success);
 		
 		if(!success)
-			printf("The job with id %s doesn't exist in the list\n", elemRetirar);
+			printf(_FG_RED"The job with id "_FG_CYAN"%d"_FG_RED" does not exist in the list"_RESET, intElemRetirar);
 
 	}
 }
 //#####################################################################################################
 void calcEscalationProposal(jobList *jobList) {}
 //#####################################################################################################
+/**
+ * @brief Print the machines used to obtain the shortest result and the minimum number of
+ * time units needed to complete the job
+ * 
+ * @param opL pointer to the first element of the list
+ */
+void determineShortestTime(operationList *opL) {
+	int i = 0, j = 0, soma = 0, min, mach;
+
+	system("cls");
+	if(opL->next==NULL) {
+		printf(_FG_RED"No operations in the list\n"_RESET);
+	}
+	else {
+		printf(_FG_YELLOW"Machines used to obtain the shortest result\n"_RESET);
+		while(opL->next != NULL) { 
+			min = 99999;
+			for (j = 0; j < opL->op.quantMachines; ++j) {
+				if(opL->op.machineAndTime[_TIMES*opL->op.quantMachines + j] < min) {
+					min = opL->op.machineAndTime[_TIMES*opL->op.quantMachines + j];
+					mach = opL->op.machineAndTime[_MACHINES*opL->op.quantMachines + j];
+				}
+			}
+			printf(_FG_CYAN"%d"_FG_YELLOW, mach);
+			if(opL->next->next != NULL)
+				printf("->");
+
+			soma = soma + min;
+			opL = opL->next;
+		}
+		printf(_FG_YELLOW"\n\nMinimum number of time units needed to complete the job: "_FG_CYAN"%d\n"_RESET, soma);
+	}
+}
+/**
+ * @brief Print the machines used to obtain the longest result and the maximum number of time
+ * units needed to complete the job
+ * 
+ * @param opL pointer to the first element of the list
+ */
+void determineLongestTime(operationList *opL) {
+	int i = 0, j = 0, soma = 0, max, mach;
+
+	system("cls");
+	if(opL->next==NULL) {
+		printf(_FG_RED"No operations in the list\n"_RESET);
+	}
+	else {
+		printf(_FG_YELLOW"Machines used to obtain the longest result\n"_RESET);
+		while(opL->next != NULL) { 
+			max = 0;
+			for (j = 0; j < opL->op.quantMachines; j++) {
+				if(opL->op.machineAndTime[_TIMES*opL->op.quantMachines + j] > max) {
+					max = opL->op.machineAndTime[_TIMES*opL->op.quantMachines + j];
+					mach = opL->op.machineAndTime[_MACHINES*opL->op.quantMachines + j];
+				}
+			}
+			printf(_FG_CYAN"%d"_FG_YELLOW, mach);
+			if(opL->next->next != NULL)
+				printf("->");
+
+			soma = soma + max;
+			opL = opL->next;
+		}
+		printf(_FG_YELLOW"\n\nMaximum number of time units needed to complete the job: "_FG_CYAN"%d\n"_RESET, soma);
+	}
+}
 /**
  * @brief It's a recursive function that calculates the average time of all possibilities
  * 
@@ -835,38 +902,31 @@ void calcEscalationProposal(jobList *jobList) {}
  * 
  * @return The average time of all possibilities.
  */
-void determineAverageTimeOfAllPossibilities(operationList *opL,int *id, int soma, float *media, int currentQuantMachines, int currentPosition) {
+void determineAverageTimeOfAllPossibilities(operationList *opL,int *id, int soma, float *media) {
 	if(opL->next == NULL){
 		(*id)++;
-		printf("Possibility Number: %d --> Sum: %d\n", (*id),soma);
-		if((currentQuantMachines - currentPosition) == 1)
-			printf("\n");
+		printf(_FG_YELLOW"Possibility Number: %d --> Sum: "_FG_CYAN"%d\n"_RESET, (*id),soma);
 		(*media) = (*media) + soma;
 		return;
 	}
 
-	for(int i=0; i < opL->op.quantMachines; i++) {
-		soma = soma + opL->op.machineAndTime[1*opL->op.quantMachines + i];
-		determineAverageTimeOfAllPossibilities(opL->next,&(*id),soma,&(*media),opL->op.quantMachines, i);
-		soma = soma - opL->op.machineAndTime[1*opL->op.quantMachines + i];
-	}
+	for(int i=0; i < opL->op.quantMachines; i++) 
+		determineAverageTimeOfAllPossibilities(opL->next,&(*id),soma + opL->op.machineAndTime[_TIMES*opL->op.quantMachines + i],&(*media));
 }
 /**
  * @brief It calculates the average time of all possibilities of a job
  * 
  * @param jbL pointer to the job list
  */
-void determineAverageTime(jobList *jbL) {
-	jobList *jobToFind;
+void determineAverageTime(operationList *opL) {
 	int soma = 0, id = 0;
 	float media = 0;
 
 	system("cls");
-	jobToFind = findJob(jbL);
-	determineAverageTimeOfAllPossibilities(jobToFind->opL,&id,soma,&media,0,0);
+	determineAverageTimeOfAllPossibilities(opL,&id,soma,&media);
 	media = media/(float)id;
 
-	printf("Average time of all possibilities: %.2f\n\n",media);
+	printf(_FG_B_YELLOW"Average time of all possibilities: "_FG_B_CYAN"%.2f"_RESET"\n\n",media);
 }
 /**
  * @brief It writes the data in the linked list to a file
@@ -882,19 +942,19 @@ void writeInFile(operationList *opL, int id, FILE *f_JOB) {
 	while(opL->next != NULL) {
 		for(i = 0; i < opL->op.quantMachines; ++i) {
 			if( i == 0)
-				fprintf(f_JOB,"(%d,", opL->op.machineAndTime[0*opL->op.quantMachines + i]);
+				fprintf(f_JOB,"(%d,", opL->op.machineAndTime[_MACHINES*opL->op.quantMachines + i]);
 			else if((opL->op.quantMachines - i) != 1)
-				fprintf(f_JOB,"%d,", opL->op.machineAndTime[0*opL->op.quantMachines + i]);
+				fprintf(f_JOB,"%d,", opL->op.machineAndTime[_MACHINES*opL->op.quantMachines + i]);
 			else
-				fprintf(f_JOB,"%d)\n", opL->op.machineAndTime[0*opL->op.quantMachines + i]);
+				fprintf(f_JOB,"%d)\n", opL->op.machineAndTime[_MACHINES*opL->op.quantMachines + i]);
 		}
 		for(i = 0; i < opL->op.quantMachines; ++i) {
 			if( i == 0)
-				fprintf(f_JOB,"[%d,", opL->op.machineAndTime[1*opL->op.quantMachines + i]);
+				fprintf(f_JOB,"[%d,", opL->op.machineAndTime[_TIMES*opL->op.quantMachines + i]);
 			else if((opL->op.quantMachines - i) != 1)
-				fprintf(f_JOB,"%d,", opL->op.machineAndTime[1*opL->op.quantMachines + i]);
+				fprintf(f_JOB,"%d,", opL->op.machineAndTime[_TIMES*opL->op.quantMachines + i]);
 			else
-				fprintf(f_JOB,"%d]\n", opL->op.machineAndTime[1*opL->op.quantMachines + i]);
+				fprintf(f_JOB,"%d]\n", opL->op.machineAndTime[_TIMES*opL->op.quantMachines + i]);
 		}
 		opL = opL->next;
 	}
@@ -924,10 +984,10 @@ void saveDataInFile(jobList *jbL) {
 	FILE *f_JOB = fopen("dados.txt","w");
 	int j;
 
-    if(f_JOB != NULL) {
+	if(f_JOB != NULL) {
 		orderTreeToSaveInFile(jbL, f_JOB);
 	}
-    fclose(f_JOB);
+	fclose(f_JOB);
 }
 /**
  * @brief It asks the user if they want to save the data in the file, and if they do, it saves the data
@@ -940,10 +1000,10 @@ void saveDataYN(jobList *jbL) {
 	int opYN;
 
 	if (jbL == NULL) {
-		printf("The list has no jobs!!\n");
+		printf(_FG_CYAN"The list has no jobs!!"_RESET"\n");
 	}
 	else {
-		printf("Do you to save the data in the file??\n");
+		printf(_FG_CYAN"Do you to save the data in the file??"_RESET"\n");
 		opYN = yesNo();
 		if(opYN != 0) {
 			saveDataInFile(jbL);
@@ -961,18 +1021,18 @@ void saveDataYN(jobList *jbL) {
  * @return the root of the tree.
  */
 void deallocate(jobList *root) {
-    if(root == NULL)
-        return;
+	if(root == NULL)
+		return;
 	
 	while((root->opL) != NULL) {
 		free(root->opL);
 		root->opL = root->opL->next;
 	}
 
-    deallocate(root->right);
-    deallocate(root->left);
+	deallocate(root->right);
+	deallocate(root->left);
 
-    free(root);
+	free(root);
 }
 /**
  * @brief It asks the user for an integer, and if the user enters a non-integer, it asks the user to try
@@ -985,32 +1045,32 @@ void deallocate(jobList *root) {
 int askUserIntegers(char *textToAsk) {
 	int i, success, inputConverted;
 	char *endptr, buf[1024];
-	
+
 	do {
 		success = 0;
 		printf("%s",textToAsk);
 
 		if(!fgets(buf, sizeof(buf), stdin)) {
 			printf("Something went wrong try again\n\n");
-            printf("Error: %d\n", errno);
+			printf("Error: %d\n", errno);
 			system("pause");
 		}
 		errno = 0; // reset error number
 		inputConverted = strtol(buf, &endptr, 10);
 		if(errno == EINVAL) {
-            printf("Conversion error occurred: %d\n", errno);
-            exit(0);
-        }
+			printf("Conversion error occurred: %d\n", errno);
+			exit(0);
+		}
 		if(errno == ERANGE) {
-			printf("The number entered is either too large or too small.\n\n");
+			printf(_FG_RED"The number entered is either too large or too small."_RESET"\n\n");
 		}
 		else if (endptr == buf)	{
 			// no character was read.
-			printf("No character was read.\n");
+			printf(_FG_RED"No character was read."_RESET"\n");
 		}
 		else if ((*endptr) && (*endptr != '\n')) {
 			// *endptr is neither end of string nor newline, so we didn't convert the *whole* input.
-			printf("No character was read.\n");
+			printf(_FG_RED"No character was read."_RESET"\n");
 		}
 		else {
 			return inputConverted;
@@ -1023,51 +1083,51 @@ int askUserIntegers(char *textToAsk) {
  * @param option pointer to the integer that will hold the user's input
  */
 void menu(int *option) {
-    int i, success;
+	int i, success;
 	char *endptr, buf[1024];
 	
 	do {
 		system("cls");
 		success = 0;
 
-		printf("%c",201); for(i = 0; i < 77; i++) printf("%c",205); printf("%c\n",187);
-		_printf_p("%1$c                                   MENU                                      %1$c\n"
-				  "%1$c                                                                             %1$c\n"
-				  "%1$c   0 - Exit                                                                  %1$c\n"
-				  "%1$c   1 - List Job/s (in Order)      2 - Print Job tree       3 - Find job      %1$c\n"
-				  "%1$c   4 - Insert Job                 5 - Remove Job           6 - Edit Job      %1$c\n"
-				  "%1$c   7 - Escalation proposal                                                   %1$c\n"
-				  "%1$c   8 - Avarege time of all possibilities                                     %1$c\n"
-				  "%1$c                                                                             %1$c\n",186);
-		printf("%c",200); for(i = 0; i < 77; i++) printf("%c",205); printf("%c\nOption: ",188);
+		printf(_FG_CYAN"%c",201); for(i = 0; i < 77; i++) printf("%c",205); printf("%c\n",187);
+		_printf_p("%1$c                                   "_FG_YELLOW"MENU"_FG_CYAN"                                      %1$c\n"
+				"%1$c                                                                             %1$c\n"
+				"%1$c   0 - Exit                                                                  %1$c\n"
+				"%1$c   1 - List Job/s (in Order)      2 - Print Job tree       3 - Find job      %1$c\n"
+				"%1$c   4 - Insert Job                 5 - Remove Job           6 - Edit Job      %1$c\n"
+				"%1$c                                                                             %1$c\n"
+				"%1$c   7 - Escalation proposal                                                   %1$c\n"
+				"%1$c                                                                             %1$c\n",186);
+		printf("%c",200); for(i = 0; i < 77; i++) printf("%c",205); printf("%c\nOption: "_RESET,188);
 
 		if(!fgets(buf, sizeof(buf), stdin)) {
 			printf("Something went wrong try again\n\n");
-            printf("Error: %d\n", errno);
+			printf("Error: %d\n", errno);
 			system("pause");
 		}
 		errno = 0; // reset error number
 		(*option) = strtol(buf, &endptr, 10);
 		if(errno == EINVAL) {
-            printf("Conversion error occurred: %d\n", errno);
-            exit(0);
-        }
+			printf(_FG_RED"Conversion error occurred: %d"_RESET"\n", errno);
+			exit(0);
+		}
 		if(errno == ERANGE) {
-			printf("The number entered is either too large or too small.\n\n");
+			printf(_FG_RED"The number entered is either too large or too small."_RESET"\n\n");
 			system("pause");
 		}
-		else if (((*option) > 8) || ((*option) < 0)) {
-			printf("Please enter a number between 0 and 7.\n\n");
+		else if (((*option) > 7) || ((*option) < 0)) {
+			printf(_FG_RED"Please enter a number between 0 and 7."_RESET"\n\n");
 			system("pause");
 		}
 		else if (endptr == buf)	{
 			// no character was read.
-			printf("No character was read. Please enter a number between 0 and 7.\n\n");
+			printf(_FG_RED"No character was read. Please enter a number between 0 and 7."_RESET"\n\n");
 			system("pause");
 		}
 		else if ((*endptr) && (*endptr != '\n')) {
 			// *endptr is neither end of string nor newline, so we didn't convert the *whole* input.
-			printf("No character was read. Please enter a number between 0 and 7.\n\n");
+			printf(_FG_RED"No character was read. Please enter a number between 0 and 7."_RESET"\n\n");
 			system("pause");
 		}
 		else {
@@ -1088,42 +1148,46 @@ void menuEditJob(int *optionEditJob) {
 		system("cls");
 		success = 0;
 
-		printf("%c",201); for(i = 0; i < 69; i++) printf("%c",205); printf("%c\n",187);
-		_printf_p("%1$c                           MENU - Edit Job                           %1$c \n"
-				  "%1$c                                                                     %1$c \n"
-				  "%1$c   0 - Back to main menu                                             %1$c \n"
-				  "%1$c   1 - List Operations                3 - Remove Operation           %1$c \n"
-				  "%1$c   2 - Insert Operation               4 - Edit Operation             %1$c \n"
-				  "%1$c                                                                     %1$c \n",186);
-		printf("%c",200); for(i = 0; i < 69; i++) printf("%c",205); printf("%c\nOption: ",188);
+		printf(_FG_CYAN"%c",201); for(i = 0; i < 77; i++) printf("%c",205); printf("%c\n",187);
+		_printf_p("%1$c                               "_FG_YELLOW"MENU - Edit Job"_FG_CYAN"                               %1$c\n"
+				"%1$c                                                                             %1$c\n"
+				"%1$c   0 - Back to main menu                                                     %1$c\n"
+				"%1$c   1 - List Operations                      3 - Remove Operation             %1$c\n"
+				"%1$c   2 - Insert Operation                     4 - Edit Operation               %1$c\n"
+				"%1$c                                                                             %1$c\n"
+				"%1$c   5 - Determine Shortest time                                               %1$c\n"
+				"%1$c   6 - Determine Longest time                                                %1$c\n"
+				"%1$c   7 - Determine Averege time of all possibilities                           %1$c\n"
+				"%1$c                                                                             %1$c\n",186);
+		printf("%c",200); for(i = 0; i < 77; i++) printf("%c",205); printf("%c\nOption: "_RESET,188);
 
 		if(!fgets(buf, sizeof(buf), stdin)) {
 			printf("Something went wrong try again\n\n");
-            printf("Error: %d\n", errno);
+			printf("Error: %d\n", errno);
 			system("pause");
 		}
 		errno = 0; // reset error number
 		(*optionEditJob) = strtol(buf, &endptr, 10);
 		if(errno == EINVAL) {
-            printf("Conversion error occurred: %d\n", errno);
-            exit(0);
-        }
+			printf(_FG_RED"Conversion error occurred: %d"_RESET"\n", errno);
+			exit(0);
+		}
 		if(errno == ERANGE) {
-			printf("The number entered is either too large or too small.\n\n");
+			printf(_FG_RED"The number entered is either too large or too small."_RESET"\n\n");
 			system("pause");
 		}
-		else if (((*optionEditJob) > 4) || ((*optionEditJob) < 0)) {
+		else if (((*optionEditJob) > 7) || ((*optionEditJob) < 0)) {
 			printf("Please enter a number between 0 and 7.\n\n");
 			system("pause");
 		}
 		else if (endptr == buf)	{
 			// no character was read.
-			printf("No character was read. Please enter a number between 0 and 7.\n\n");
+			printf(_FG_RED"No character was read. Please enter a number between 0 and 7."_RESET"\n\n");
 			system("pause");
 		}
 		else if ((*endptr) && (*endptr != '\n')) {
 			// *endptr is neither end of string nor newline, so we didn't convert the *whole* input.
-			printf("No character was read. Please enter a number between 0 and 7.\n\n");
+			printf(_FG_RED"No character was read. Please enter a number between 0 and 7."_RESET"\n\n");
 			system("pause");
 		}
 		else {
