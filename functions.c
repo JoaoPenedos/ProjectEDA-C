@@ -247,11 +247,8 @@ void createOperationFromFile(operationList *opL, int idOp, int nMachines, int ar
  */
 jobList *checkDataInFile(jobList *jbL, int *idContJob) {
 	jobList *nodePointer, *root = NULL;
-	operationList *pOpL;
-	job auxJb;
-	operation auxOp;
 	FILE *f_JOB = fopen("dados.txt","r");
-	int i = 0, cont = 0, arrayM[100], arrayT[100], digitCount = 0, iochar, readNumber, idContOp;
+	int i = 0, cont = 0, arrayM[100], arrayT[100], digitCount = 0, iochar;
 	char simpleBuffer[12];//max 10 int digits + 1 negative sign + 1 null char string....if you read more, then you probably don't    have an int there....
 
 	if(f_JOB != NULL) {
@@ -392,7 +389,7 @@ void printJobTreeByLevel(jobList *root, int level) {
 	for (int i = 0; i < level; i++)
 		printf(i == level - 1 ? "|->" : "  ");
 
-	printf("%d\n", root->jb.id);
+	printf(_FG_B_CYAN"%d\n"_FG_GREEN, root->jb.id);
 	printJobTreeByLevel(root->left, level + 1);
 	printJobTreeByLevel(root->right, level + 1);
 }
@@ -431,9 +428,7 @@ jobList *findJobInTree(jobList *root, int k) {
  */
 jobList *findJob(jobList *auxjbL) {
 	jobList *jobToFind;
-	operation *auxOp, *x;
-	int i, j, intElemFind, *machArray;
-	char elemFind[40], *input;
+	int intElemFind;
 
 	system("cls");
 	
@@ -521,8 +516,8 @@ return 1;
  * 
  * @param op is a pointer to a struct operation
  */
-operation readOperation(operation *op) {
-	char *input, *str;
+void readOperation(operation *op) {
+	char *str;
 	int i, j, check;
 
 	op->quantMachines = askUserIntegers(_FG_YELLOW"How many machines can be used for this operation: "_RESET);
@@ -547,7 +542,7 @@ operation readOperation(operation *op) {
 					}
 				}while(check == 0);
 			}
-			else {				
+			else {	
 				sprintf(str, _FG_YELLOW"How long will machine "_FG_CYAN"%d"_FG_YELLOW" take: "_RESET, op->machineAndTime[_MACHINES*op->quantMachines + j]);
 				op->machineAndTime[i*op->quantMachines + j] = askUserIntegers(str);
 			}
@@ -563,8 +558,6 @@ operation readOperation(operation *op) {
 void insertOperationNode(operationList *op, int *nOperations) {
 	operationList *auxOp;
 	int id = 1;
-	char *input;
-	int i, j, check;
 
 	auxOp = newOperationNode();
 	system("cls");
@@ -593,10 +586,9 @@ void insertOperationNode(operationList *op, int *nOperations) {
  * @param idContJob is a counter that keeps track of the number of jobs that have been added to the
  * list.
  */
-jobList *insertJob(jobList **jbL,int *idContJob) {
+void insertJob(jobList **jbL,int *idContJob) {
 	jobList *currentNode = NULL;
-	int intElemRetirar, opYN;
-	char elemRetirar[40];
+	int opYN;
 
 	system("cls");
 	(*idContJob)++;
@@ -615,9 +607,8 @@ jobList *insertJob(jobList **jbL,int *idContJob) {
  * @param nOperations number of operations in the list
  */
 void removeOperation(operationList *opL, int *nOperations) {
-	operationList *x, *y, *atras, *frente, *auxOp;
+	operationList *y, *atras, *frente, *auxOp;
 	int intElemRetirar;
-	char elemRetirar[40];
 
 	system("cls");
 	y = opL;
@@ -669,9 +660,7 @@ void removeOperation(operationList *opL, int *nOperations) {
  * @param opL pointer to the first node of the list
  */
 void editOperation(operationList *opL) {
-	operationList *auxOp, *x;
-	int i, j, intElemEditar, *machArray;
-	char elemEditar[40], *input;
+	int intElemEditar;
 
 	system("cls");
 	
@@ -802,9 +791,7 @@ jobList *deleteNode(jobList *root, int key, int originalKey, int *success) {
  * @param jbL pointer to the list
  */
 void removeJob(jobList **jbL) {
-	jobList *root;
 	int intElemRetirar, success = 0;
-	char elemRetirar[40];
 
 	system("cls");
 	
@@ -831,7 +818,7 @@ void calcEscalationProposal(jobList *jobList) {}
  * @param opL pointer to the first element of the list
  */
 void determineShortestTime(operationList *opL) {
-	int i = 0, j = 0, soma = 0, min, mach;
+	int j = 0, soma = 0, min, mach;
 
 	system("cls");
 	if(opL->next==NULL) {
@@ -864,7 +851,7 @@ void determineShortestTime(operationList *opL) {
  * @param opL pointer to the first element of the list
  */
 void determineLongestTime(operationList *opL) {
-	int i = 0, j = 0, soma = 0, max, mach;
+	int j = 0, soma = 0, max, mach;
 
 	system("cls");
 	if(opL->next==NULL) {
@@ -982,7 +969,6 @@ void orderTreeToSaveInFile(jobList *n, FILE *f_JOB) {
  */
 void saveDataInFile(jobList *jbL) {
 	FILE *f_JOB = fopen("dados.txt","w");
-	int j;
 
 	if(f_JOB != NULL) {
 		orderTreeToSaveInFile(jbL, f_JOB);
@@ -1043,11 +1029,10 @@ void deallocate(jobList *root) {
  * @return the inputConverted variable.
  */
 int askUserIntegers(char *textToAsk) {
-	int i, success, inputConverted;
+	int inputConverted;
 	char *endptr, buf[1024];
 
 	do {
-		success = 0;
 		printf("%s",textToAsk);
 
 		if(!fgets(buf, sizeof(buf), stdin)) {

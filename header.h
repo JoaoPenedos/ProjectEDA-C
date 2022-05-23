@@ -74,7 +74,7 @@ jobList *leftRotate(jobList *x);
 jobList *minValueNode(jobList *node);
 
 jobList *insertNode(jobList *node, int key, jobList **nodePointer);
-jobList *insertJob(jobList **jbL,int *idContJob);
+void insertJob(jobList **jbL,int *idContJob);
 
 jobList *deleteNode(jobList *root, int key, int originalKey, int *success);
 void removeJob(jobList **jbL);
@@ -95,7 +95,7 @@ jobList *findJob(jobList *auxjbL);
 // void calcEscalationProposal(job *jobList);
 
 int searchEqualMachine(operation m, int elemToFind, int currentPosition);
-operation readOperation(operation *op);
+void readOperation(operation *op);
 void insertOperationNode(operationList *op, int *nOperations);
 void removeOperation(operationList *opL, int *nOperations);
 void editOperation(operationList *opL);

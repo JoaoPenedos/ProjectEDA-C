@@ -30,10 +30,6 @@ int main() {
 	system("cls");
 	jbL = checkDataInFile(jbL,&idContJob);
 
-	// printJobTreeByLevel(jbL, 0);
-	// ListJobTreeInOrder(jbL);
-	// system("pause");
-
 	do {
 		menu(&option);
 
@@ -47,6 +43,7 @@ int main() {
 					break;
 			case 2: system("cls");
 					printJobTreeByLevel(jbL,0);
+					printf(_RESET"\n");
 					system("pause");
 					break;
 			case 3: jobToFind = findJob(jbL);
@@ -101,8 +98,3 @@ int main() {
 	
 	return 0;
 }
-
-// case 5: determineShortestTime(jbL->op);
-//         break;
-// case 6: determineLongestTime(jbL->op);
-//         break;
