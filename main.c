@@ -19,16 +19,20 @@
 
 #ifdef _WIN32
 #include <Windows.h>
+# define DIR_SEPARATOR "\\"
 #else
 #include <unistd.h>
+# define DIR_SEPARATOR "/"
 #endif
 
 int main() {
-	jobList *jbL = NULL, *jobToFind;
-	int option, optionEditJob, idContJob = 0;
+	jobList *jbL = NULL, *jobToFind = NULL;
+	proposalList *pL = newProposalNode();
+	int option, optionEditJob, idContJob = 0, changeProposalCounter = 0;
 	
 	system("cls");
 	jbL = checkDataInFile(jbL,&idContJob);
+	pL = updateEscalationProposal(pL,jbL,&changeProposalCounter);
 
 	do {
 		menu(&option);
@@ -39,23 +43,24 @@ int main() {
 					break;
 			case 1: system("cls");
 					ListJobTreeInOrder(jbL);
-					system("pause");
+					pauseProgram();
 					break;
 			case 2: system("cls");
 					printJobTreeByLevel(jbL,0);
 					printf(_RESET"\n");
-					system("pause");
+					pauseProgram();
 					break;
 			case 3: jobToFind = findJob(jbL);
-					system("pause");
+					pauseProgram();
 					break;
 			case 4: insertJob(&jbL,&idContJob);
+					pL = updateEscalationProposal(pL,jbL,&changeProposalCounter);
 					break;
-			case 5: removeJob(&jbL);
-					system("pause");
+			case 5: removeJob(&jbL,&pL,&changeProposalCounter);
+					pauseProgram();
 			break;
 			case 6: jobToFind = findJob(jbL);
-					system("pause");
+					pauseProgram();
 					if(jobToFind != NULL) {
 						do {
 							menuEditJob(&optionEditJob);
@@ -63,38 +68,41 @@ int main() {
 								default:
 								case 0: break;
 								case 1: listOperations(jobToFind->opL); 
-										system("pause"); 
+										pauseProgram(); 
 										break;
 								case 2: insertOperationNode(jobToFind->opL,&(jobToFind->jb.nOperations));
-										system("pause");
+										pL = updateEscalationProposal(pL,jbL,&changeProposalCounter);
+										pauseProgram();
 										break;
-								case 3: removeOperation(jobToFind->opL,&(jobToFind->jb.nOperations));
-										system("pause");
+								case 3: removeOperation(jobToFind->opL,&(jobToFind->jb.nOperations),&pL,jbL,&changeProposalCounter);
+										pauseProgram();
 										break;
-								case 4: editOperation(jobToFind->opL);
-										system("pause");
+								case 4: editOperation(jobToFind->opL,&pL,jbL,&changeProposalCounter);
+										pauseProgram();
 										break;
 								case 5: determineShortestTime(jobToFind->opL);
-										system("pause");
+										pauseProgram();
 										break;
 								case 6: determineLongestTime(jobToFind->opL);
-										system("pause");
+										pauseProgram();
 										break;
 								case 7: determineAverageTime(jobToFind->opL);
-										system("pause");
+										pauseProgram();
 										break;
 							}
 						}while(optionEditJob != 0);
 					}
 					break;
-			case 7: calcEscalationProposal(jbL);
+			case 7: printEscalationProposal(pL);
+					pauseProgram();
 					break;
 		}
 	}while(option != 0);
 	
 	saveDataYN(jbL);
 
-	deallocate(jbL); 
+	deallocate(jbL);
+	deallocateProposal(pL);
 	
 	return 0;
 }
