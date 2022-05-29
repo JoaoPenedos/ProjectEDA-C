@@ -39,7 +39,7 @@ void pauseProgram() {
  * 
  * @return A pointer to a jobList node.
  */
-jobList *newJobNode(int key) {
+jobList *newJobListNode(int key) {
 	jobList *node = (jobList *) malloc(sizeof(jobList));
 
 	if(node == NULL) {
@@ -52,7 +52,7 @@ jobList *newJobNode(int key) {
 		iniJb(&(node->jb));
 		node->jb.id = key;
 		node->jb.height = 1;
-		node->opL = newOperationNode();
+		node->opL = newOperationListNode();
 		node->left = NULL;
 		node->right = NULL;
 		return node;
@@ -63,7 +63,7 @@ jobList *newJobNode(int key) {
  * 
  * @return A pointer to a node of the operationList type.
  */
-operationList *newOperationNode() {
+operationList *newOperationListNode() {
 	operationList *p = (operationList *) malloc( sizeof(operationList));
 	
 	if(p == NULL) {
@@ -84,7 +84,7 @@ operationList *newOperationNode() {
  * 
  * @return A pointer to a proposalList struct.
  */
-proposalList *newProposalNode() {
+proposalList *newProposalListNode() {
 	proposalList *node = (proposalList *) malloc(sizeof(proposalList));
 
 	if(node == NULL) {
@@ -103,6 +103,22 @@ proposalList *newProposalNode() {
 		node->next = NULL;
 		return node;
 	}
+}
+proposal *newProposalNode() {
+	proposal *p = (proposal *) malloc(sizeof(proposal));
+
+	if(p == NULL) {
+		system("cls");
+		printf(_FG_RED"Can't create list"_RESET"\n\n");
+		pauseProgram();
+		return NULL;
+	}
+	else {
+		p->jobId = 0;
+		p->opId = 0;
+		p->time = 0;
+		return p;
+	}	
 }
 /**
  * @brief It initializes the job structure
@@ -335,22 +351,22 @@ void createOperationFromFile(operationList *opL, int idOp, int nMachines, int ar
 	operation auxOp;
 	int i = 0;
 
-	pOpL = newOperationNode();
+	if(pOpL = newOperationListNode(), pOpL != NULL) {
+		while(opL->next != NULL) {
+			opL = opL->next;
+		}
 
-	while(opL->next != NULL) {
-		opL = opL->next;
+		iniOp(&auxOp);
+		auxOp.id = idOp;
+		auxOp.quantMachines = nMachines;
+		auxOp.machineAndTime = (int *)malloc(sizeof(int[_ARRAY_MACHINES_TIMES][auxOp.quantMachines]));
+		for(i=0; i < auxOp.quantMachines; i++) {
+			auxOp.machineAndTime[_MACHINES*auxOp.quantMachines + i] = arrM[i];
+			auxOp.machineAndTime[_TIMES*auxOp.quantMachines + i] = arrT[i];
+		}
+		opL->op = auxOp;
+		opL->next = pOpL;
 	}
-
-	iniOp(&auxOp);
-	auxOp.id = idOp;
-	auxOp.quantMachines = nMachines;
-	auxOp.machineAndTime = (int *)malloc(sizeof(int[_ARRAY_MACHINES_TIMES][auxOp.quantMachines]));
-	for(i=0; i < auxOp.quantMachines; i++) {
-		auxOp.machineAndTime[_MACHINES*auxOp.quantMachines + i] = arrM[i];
-		auxOp.machineAndTime[_TIMES*auxOp.quantMachines + i] = arrT[i];
-	}
-	opL->op = auxOp;
-	opL->next = pOpL;
 }
 /**
  * @brief It reads a file with the following format:
@@ -433,7 +449,7 @@ jobList *checkDataInFile(jobList *jbL, int *idContJob) {
 jobList *insertNode(jobList *node, int key, jobList **nodePointer) {
 	// Find the correct position to insertNode the node and insertNode it
 	if (node == NULL)
-		return ((*nodePointer) = newJobNode(key));
+		return ((*nodePointer) = newJobListNode(key));
 
 	if (key < node->jb.id)
 		node->left = insertNode(node->left, key, &(*nodePointer));
@@ -470,10 +486,9 @@ jobList *insertNode(jobList *node, int key, jobList **nodePointer) {
  * current added job node.
  * 
  * @param jbL pointer to the jobList
- * @param idContJob is a counter that keeps track of the number of jobs that have been added to the
- * list.
+ * @param idContJob is a counter that keeps track of the number of jobs that have been added to the list.
  */
-void insertJob(jobList **jbL,int *idContJob) {
+void insertJob(jobList **jbL,int *idContJob, int *success) {
 	jobList *currentNode = NULL;
 	int opYN;
 
@@ -483,7 +498,7 @@ void insertJob(jobList **jbL,int *idContJob) {
 
 	printf(_FG_CYAN"Do you want to add operations to the current added Job node? \n"_RESET);
 	while (opYN = yesNo(), opYN == 1) {
-		insertOperationNode(currentNode->opL,&(currentNode->jb.nOperations));
+		insertOperationNode(currentNode->opL,&(currentNode->jb.nOperations),&(*success));
 	}
 }
 /**
@@ -522,9 +537,11 @@ jobList *deleteNode(jobList *root, int key, int originalKey, int *success) {
 			(*success) = 1;
 			while((temp->opL) != NULL) {
 				free(temp->opL);
+				temp->opL = NULL;
 				temp->opL = temp->opL->next;
 			}
 			free(temp);
+			temp = NULL;
 		} 
 		else {
 			jobList *temp = minValueNode(root->right);
@@ -564,13 +581,13 @@ jobList *deleteNode(jobList *root, int key, int originalKey, int *success) {
  * It removes a job from the list and updates the proposals that are affected by the removal
  * 
  * @param jbL pointer to the job list
- * @param pL pointer to the proposal list
  * @param changeProposalCounter is a counter that is used to know if the proposals have changed.
  */
-void removeJob(jobList **jbL, proposalList **pL, int *changeProposalCounter) {
-	int intElemRetirar, success = 0;
+void removeJob(jobList **jbL, int *success) {
+	int intElemRetirar;
 
 	system("cls");
+	(*success) = 0;
 	
 	if((*jbL) == NULL) { 
 		printf(_FG_RED"No operations in the list\n"_RESET); 
@@ -578,13 +595,10 @@ void removeJob(jobList **jbL, proposalList **pL, int *changeProposalCounter) {
 	else {
 		intElemRetirar = askUserIntegers(_FG_YELLOW"What is the code whose job you want to remove?\n"_RESET);
 
-		(*jbL) = deleteNode((*jbL),intElemRetirar,intElemRetirar,&success);
+		(*jbL) = deleteNode((*jbL),intElemRetirar,intElemRetirar,&(*success));
 		
-		if(!success)
+		if(!(*success))
 			printf(_FG_RED"The job with id "_FG_CYAN"%d"_FG_RED" does not exist in the list"_RESET, intElemRetirar);
-		else
-			(*pL) = updateEscalationProposal((*pL),(*jbL),&(*changeProposalCounter));
-
 	}
 }
 /**
@@ -687,23 +701,19 @@ void readOperation(operation *op) {
  * @param op pointer to the first node of the list
  * @param nOperations Pointer to update the number of operations of desired the job node
  */
-void insertOperationNode(operationList *op, int *nOperations) {
+void insertOperationNode(operationList *op, int *nOperations, int *success) {
 	operationList *auxOp;
 	int id = 1;
 
-	auxOp = newOperationNode();
 	system("cls");
-
-	if(auxOp==NULL) { 
-		printf(_FG_RED"There is no more memory space. It is impossible to insert\n\n"_RESET);
-		pauseProgram();
-	}
-	else {
+	(*success) = 0;
+	if(auxOp = newOperationListNode(), auxOp != NULL) {
 		while((op->next) != NULL) {
 			id = op->op.id + 1;
 			op = op->next;
 		}
 
+		(*success) = 1;
 		(*nOperations)++;
 		op->op.id = id;
 		readOperation(&op->op);
@@ -720,8 +730,8 @@ void insertOperationNode(operationList *op, int *nOperations) {
  * @param changeProposalCounter is a counter that counts the number of proposals that have been
  * changed.
  */
-void removeOperation(operationList *opL, int *nOperations, proposalList **pL, jobList *jbL, int *changeProposalCounter) {
-	operationList *y, *atras, *frente, *auxOp;
+void removeOperation(operationList *opL, int *nOperations, int *success) {
+	operationList *y = NULL, *atras = NULL, *frente = NULL, *auxOp = NULL;
 	int intElemRetirar;
 
 	system("cls");
@@ -741,7 +751,8 @@ void removeOperation(operationList *opL, int *nOperations, proposalList **pL, jo
 			listOperationNode(opL->op);
 			opL = opL->next;
 			free(y);
-			(*pL) = updateEscalationProposal((*pL),jbL,&(*changeProposalCounter));
+			y = NULL;
+			(*success) = 1;
 		}
 		else {
 			auxOp = opL;
@@ -759,10 +770,12 @@ void removeOperation(operationList *opL, int *nOperations, proposalList **pL, jo
 				printf(_FG_YELLOW"The element has been removed\n"_RESET);
 				listOperationNode(auxOp->op);
 				free(auxOp);
-				(*pL) = updateEscalationProposal((*pL),jbL,&(*changeProposalCounter));
+				auxOp = NULL;
+				(*success) = 1;
 			}
 			else {
 				system("cls");
+				(*success) = 0;
 				printf(_FG_RED"The element with code "_FG_CYAN"%d"_FG_RED" does not exist in the list"_RESET, intElemRetirar);
 			}
 		}
@@ -773,12 +786,11 @@ void removeOperation(operationList *opL, int *nOperations, proposalList **pL, jo
  * replace the old data. If succeded it updates the proposal
  * 
  * @param opL operationList *opL;
- * @param pL pointer to the proposal list
  * @param jbL
  * @param changeProposalCounter is a counter that counts the number of proposals that have been
  * changed.
  */
-void editOperation(operationList *opL, proposalList **pL, jobList *jbL, int *changeProposalCounter) {
+void editOperation(operationList *opL, int *success) {
 	int intElemEditar;
 
 	system("cls");
@@ -794,7 +806,7 @@ void editOperation(operationList *opL, proposalList **pL, jobList *jbL, int *cha
 			printf(_FG_YELLOW"The element being edited\n"_RESET);
 			listOperationNode(opL->op);
 			readOperation(&(opL->op));
-			(*pL) = updateEscalationProposal((*pL),jbL,&(*changeProposalCounter));
+			(*success) = 1;
 		}
 		else {
 			while((intElemEditar != opL->op.id) && (opL->next != NULL)) {
@@ -806,10 +818,11 @@ void editOperation(operationList *opL, proposalList **pL, jobList *jbL, int *cha
 				printf(_FG_YELLOW"The element being edited\n"_RESET);
 				listOperationNode(opL->op);
 				readOperation(&(opL->op));
-				(*pL) = updateEscalationProposal((*pL),jbL,&(*changeProposalCounter));
+				(*success) = 1;
 			}
 			else {
 				system("cls");
+				(*success) = 0;
 				printf(_FG_RED"The element with code "_FG_CYAN"%d"_FG_RED" does not exist in the list"_RESET, intElemEditar);
 			}
 		}
@@ -918,6 +931,60 @@ void determineAverageTime(operationList *opL) {
 	printf(_FG_B_YELLOW"Average time of all possibilities: "_FG_B_CYAN"%.2f"_RESET"\n\n",media);
 }
 /**
+ * It takes a pointer to a proposalList, a jobId, an opId, a lastTimeUsed, a machine, and a minimum
+ * time, and it fills the proposal space with the proposal
+ * 
+ * @param pL pointer to the proposalList
+ * @param jobId the job id
+ * @param opId the operation id
+ * @param lastTimeUsed the last time the machine was used
+ * @param mach machine number
+ * @param minTime the minimum time the operation can be scheduled for
+ * 
+ * @return The time at which the operation is scheduled.
+ */
+int fillProposalSpace(proposalList *pL,int jobId, int opId, int lastTimeUsed, int mach, int minTime) {
+	proposal *p = NULL;
+	int i, j, spaceFree = 0, maxReached = 0;
+
+	for(i = lastTimeUsed; i < _MAXT; i++) {
+		if(pL->proposalData[mach][i] == NULL) {
+			for(j = i; j < i + minTime; j++) {
+				if(pL->proposalData[mach][j] != NULL) {
+					spaceFree = FALSE;
+					if(j > _MAXT)
+						maxReached = TRUE;
+					break;
+				}
+				else {
+					if(j > _MAXT){
+						maxReached = TRUE;
+						break;
+					}
+					spaceFree = TRUE;
+				}
+			}
+
+			if(spaceFree && (p = newProposalNode(), p != NULL)) {
+				p->jobId = jobId;
+				p->opId = opId;
+				p->time = minTime;
+
+				for(j = i; j < i + minTime; j++) {
+					pL->proposalData[mach][j] = p;
+				}
+				return j;
+			}
+			if(maxReached) {
+				printf("Couldn't save the data in the Proposal Plan\n");
+				pauseProgram(); 
+				return _MAXT;
+			}
+		}
+	}
+	return _MAXT;
+}
+/**
  * @brief It takes the operation list of a job and calculates the best time to execute each operation, based
  * on the time it takes to execute it and the machines it can be executed on
  * 
@@ -926,11 +993,11 @@ void determineAverageTime(operationList *opL) {
  * @param pL a pointer to a proposalList structure
  */
 void calcEscalationProposal(operationList *opL, int jobId, proposalList *pL) {
-	int i, j, z, minTime, mach, spaceFree = 0, opId, lastTimeUsed = 0;
+	int minTime, mach, opId, lastTimeUsed = 0;
 
 	while(opL->next != NULL) {
 		minTime = 99999;
-		for (z = 0; z < opL->op.quantMachines; z++) {
+		for (int z = 0; z < opL->op.quantMachines; z++) {
 			if(opL->op.machineAndTime[_TIMES*opL->op.quantMachines + z] < minTime) {
 				minTime = opL->op.machineAndTime[_TIMES*opL->op.quantMachines + z];
 				mach = opL->op.machineAndTime[_MACHINES*opL->op.quantMachines + z];
@@ -938,33 +1005,10 @@ void calcEscalationProposal(operationList *opL, int jobId, proposalList *pL) {
 			}
 		}
 		
-		for(i = lastTimeUsed; i < _MAXT; i++){
-			if(pL->proposalData[mach-1][i] == NULL){
-				for(j = i; j < i + minTime; j++) {
-					if(pL->proposalData[mach-1][j] != NULL) {
-						spaceFree = FALSE;
-						break;
-					}
-					else
-						spaceFree = TRUE;
-				}
+		lastTimeUsed = fillProposalSpace(pL,jobId,opId,lastTimeUsed,mach-1,minTime);
+		if(lastTimeUsed == _MAXT)
+			return;
 
-				if(spaceFree) {
-					proposal *p = (proposal *) malloc(sizeof(proposal));
-					p->jobId = jobId;
-					p->opId = opId;
-					p->time = minTime;
-
-					for(j = i; j < i + minTime; j++) {
-						pL->proposalData[mach-1][j] = p;
-					}
-					goto nextOperation;
-				}
-			}
-		}
-
-		nextOperation:
-		lastTimeUsed = j;
 		opL = opL->next;
 	}
 }
@@ -997,10 +1041,11 @@ void goThroughByOrderCalcProposal(jobList *n, proposalList *pL) {
  * @return A pointer to a proposalList, the current version.
  */
 proposalList *updateEscalationProposal(proposalList *pL, jobList *jbL, int *changeCount) {
+	proposalList *p = NULL;
+	
 	// char *versionsDirectory = "VersionsDirectory\\";
     // if (mkdir(versionsDirectory) == 1){}
-    // else if(errno == EEXIST) {}
-	// else 
+    // else if(errno != EEXIST) 
     //     printf("Unable to create directory\nERROR number:%d",errno);
 
 	if(strcmp(pL->proposalVersionFile,"--") == 0) {
@@ -1010,15 +1055,9 @@ proposalList *updateEscalationProposal(proposalList *pL, jobList *jbL, int *chan
 		(*changeCount)++;
 		return pL;
 	}
-	else {
-		proposalList *p = (proposalList * ) malloc(sizeof(proposalList));
-		if(p == NULL) {
-			system("cls");
-			printf(_FG_RED"Can't create list"_RESET"\n\n");
-			pauseProgram();
-		}
-		else {
-			snprintf(p->proposalVersionFile, sizeof(pL->proposalVersionFile), /*"VersionsDirectory"DIR_SEPARATOR*/"ProposalVersionNumber_%d.txt",(*changeCount));
+	else { 
+		if(p = newProposalListNode(), p != NULL) {
+			snprintf(p->proposalVersionFile, sizeof(p->proposalVersionFile), /*"VersionsDirectory"DIR_SEPARATOR*/"ProposalVersionNumber_%d.txt",(*changeCount));
 			saveDataInFile(jbL,p->proposalVersionFile);
 			goThroughByOrderCalcProposal(jbL,p);
 			p->next = pL;
@@ -1034,22 +1073,23 @@ proposalList *updateEscalationProposal(proposalList *pL, jobList *jbL, int *chan
  * @param pL is a pointer to a proposalList structure, the current version of the proposal
  */
 void printEscalationProposal(proposalList *pL) {
-	printf("\nPROPOSAL WITH:\nMAX NUMBER OF MACHINES-->%d\nMAX TIME-->%d\n",_MAXM,_MAXT);
-	printf("\n\t|123|"
+	printf("\n\n"_FG_B_YELLOW"PROPOSAL WITH:\n"_FG_YELLOW"MAX NUMBER OF MACHINES-->"_FG_B_CYAN"%d\n"_FG_YELLOW"MAX TIME-->"_FG_B_CYAN"%d\n\n"_RESET,_MAXM,_MAXT);
+	printf(_FG_B_RED"\n\tNOTE"_FG_B_YELLOW
+			"\n\t|123|"_FG_YELLOW
 			"\n\t--> o primeiro numero representa job id"
 			"\n\t--> o segundo numero representa a operacao Id"
 			"\n\t--> o terceiro numero representa o tempo minimo ocupado pela operacao\n");
 	for(int i = 0; i < _MAXM; i++) {
-		printf("\nM%-2d--> ",i+1);
+		printf(_FG_B_YELLOW"\nM"_FG_CYAN"%-2d"_FG_B_YELLOW"--> "_FG_B_GREEN"|",i+1);
 		for(int j = 0; j < _MAXT; j++) {
 			if(pL->proposalData[i][j] != NULL)
-				printf("%d%d%d|",pL->proposalData[i][j]->jobId,pL->proposalData[i][j]->opId,pL->proposalData[i][j]->time);
+				printf(_FG_B_CYAN"%d%d%d"_FG_B_GREEN"|",pL->proposalData[i][j]->jobId,pL->proposalData[i][j]->opId,pL->proposalData[i][j]->time);
 			else
-				printf("-|");
+				printf(_FG_CYAN"---"_FG_B_GREEN"|");
 		}
 		printf("\n");
 	}
-	printf("\n\n\n");
+	printf(_RESET"\n\n\n");
 }
 /**
  * @brief It writes the data in the linked list to a file
@@ -1110,7 +1150,7 @@ void orderTreeToSaveInFile(jobList *n, FILE *f_JOB) {
  * @param jbL pointer to the jobList structure
  * @param fileName name of the file to save data
  */
-void saveDataInFile(jobList *jbL, char *fileName) {
+void saveDataInFile(jobList *jbL, const char *fileName) {
 	FILE *f_JOB = fopen(fileName,"w");
 
 	if(f_JOB != NULL) {
@@ -1165,6 +1205,7 @@ void deallocate(jobList *root) {
 	deallocate(root->left);
 
 	free(root);
+	root = NULL;
 }
 /**
  * @brief It's a function that deallocates the memory of a linked list of proposals
@@ -1383,17 +1424,3 @@ void menuEditJob(int *optionEditJob) {
 		}
 	}while(!success);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

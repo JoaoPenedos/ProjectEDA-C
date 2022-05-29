@@ -27,8 +27,8 @@
 
 int main() {
 	jobList *jbL = NULL, *jobToFind = NULL;
-	proposalList *pL = newProposalNode();
-	int option, optionEditJob, idContJob = 0, changeProposalCounter = 0;
+	proposalList *pL = newProposalListNode();
+	int option, optionEditJob, idContJob = 0, changeProposalCounter = 0, success = 0;
 	
 	system("cls");
 	jbL = checkDataInFile(jbL,&idContJob);
@@ -53,10 +53,13 @@ int main() {
 			case 3: jobToFind = findJob(jbL);
 					pauseProgram();
 					break;
-			case 4: insertJob(&jbL,&idContJob);
-					pL = updateEscalationProposal(pL,jbL,&changeProposalCounter);
+			case 4: insertJob(&jbL,&idContJob,&success);
+					if(success)
+						pL = updateEscalationProposal(pL,jbL,&changeProposalCounter);
 					break;
-			case 5: removeJob(&jbL,&pL,&changeProposalCounter);
+			case 5: removeJob(&jbL,&success);
+					if(success)
+						pL = updateEscalationProposal(pL,jbL,&changeProposalCounter);
 					pauseProgram();
 			break;
 			case 6: jobToFind = findJob(jbL);
@@ -70,14 +73,19 @@ int main() {
 								case 1: listOperations(jobToFind->opL); 
 										pauseProgram(); 
 										break;
-								case 2: insertOperationNode(jobToFind->opL,&(jobToFind->jb.nOperations));
-										pL = updateEscalationProposal(pL,jbL,&changeProposalCounter);
+								case 2: insertOperationNode(jobToFind->opL,&(jobToFind->jb.nOperations),&success);
+										if(success)
+											pL = updateEscalationProposal(pL,jbL,&changeProposalCounter);
 										pauseProgram();
 										break;
-								case 3: removeOperation(jobToFind->opL,&(jobToFind->jb.nOperations),&pL,jbL,&changeProposalCounter);
+								case 3: removeOperation(jobToFind->opL,&(jobToFind->jb.nOperations),&success);
+										if(success)
+											pL = updateEscalationProposal(pL,jbL,&changeProposalCounter);
 										pauseProgram();
 										break;
-								case 4: editOperation(jobToFind->opL,&pL,jbL,&changeProposalCounter);
+								case 4: editOperation(jobToFind->opL,&success);
+										if(success)
+											pL = updateEscalationProposal(pL,jbL,&changeProposalCounter);
 										pauseProgram();
 										break;
 								case 5: determineShortestTime(jobToFind->opL);

@@ -53,7 +53,7 @@ typedef struct proposal {
 }proposal;
 
 typedef struct proposalList {
-	char proposalVersionFile[50];
+	char proposalVersionFile[100];
     proposal *proposalData[_MAXM][_MAXT];
 	struct proposalList *next;
 }proposalList;
@@ -70,9 +70,10 @@ int yesNo();
 void menu(int *option);
 void menuEditJob(int *optionEditJob);
 
-jobList *newJobNode(int key);
-operationList *newOperationNode();
-proposalList *newProposalNode();
+jobList *newJobListNode(int key);
+operationList *newOperationListNode();
+proposalList *newProposalListNode();
+proposal *newProposalNode();
 
 void iniJb(job *jb);
 void iniOp(operation *op);
@@ -97,18 +98,18 @@ void createOperationFromFile(operationList *opL, int idOp, int cont, int arrM[],
 jobList *checkDataInFile(jobList *jbL, int *idContJob);
 
 jobList *insertNode(jobList *node, int key, jobList **nodePointer);
-void insertJob(jobList **jbL, int *idContJob);
+void insertJob(jobList **jbL, int *idContJob, int *success);
 
 jobList *deleteNode(jobList *root, int key, int originalKey, int *success);
-void removeJob(jobList **jbL, proposalList **pL, int *changeProposalCounter);
+void removeJob(jobList **jbL, int *success);
 
 jobList *findJobInTree(jobList *root, int key) ;
 jobList *findJob(jobList *auxjbL);
 
 void readOperation(operation *op);
-void insertOperationNode(operationList *op, int *nOperations);
-void removeOperation(operationList *opL, int *nOperations, proposalList **pL, jobList *jbL, int *changeProposalCounter);
-void editOperation(operationList *opL, proposalList **pL, jobList *jbL, int *changeProposalCounter);
+void insertOperationNode(operationList *op, int *nOperations, int *success);
+void removeOperation(operationList *opL, int *nOperations, int *success);
+void editOperation(operationList *opL, int *success);
 
 void determineShortestTime(operationList *opL);
 void determineLongestTime(operationList *opL);
@@ -121,7 +122,7 @@ proposalList *updateEscalationProposal(proposalList *pL, jobList *jbL, int *chan
 void printEscalationProposal(proposalList *pL);
 
 void writeInFile(operationList *opL, int id, FILE *f_JOB);
-void saveDataInFile(jobList *jbL, char *fileName);
+void saveDataInFile(jobList *jbL, const char *fileName);
 void orderTreeToSaveInFile(jobList *n, FILE *f_JOB);
 void saveDataYN(jobList *jbL);
 
