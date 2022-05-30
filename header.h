@@ -53,6 +53,7 @@ typedef struct proposal {
 }proposal;
 
 typedef struct proposalList {
+	int success;
 	char proposalVersionFile[100];
     proposal *proposalData[_MAXM][_MAXT];
 	struct proposalList *next;

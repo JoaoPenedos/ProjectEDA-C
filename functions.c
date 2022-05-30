@@ -44,9 +44,8 @@ jobList *newJobListNode(int key) {
 
 	if(node == NULL) {
 		system("cls");
-		printf(_FG_RED"Can't create tree or branch"_RESET"\n\n");
-		pauseProgram();
-		return NULL;
+		printf(_FG_B_RED"Can't create tree or branch"_RESET"\n\n");
+		exit(0);
 	}
 	else {
 		iniJb(&(node->jb));
@@ -68,9 +67,8 @@ operationList *newOperationListNode() {
 	
 	if(p == NULL) {
 		system("cls");
-		printf(_FG_RED"Can't create list"_RESET"\n\n");
-		pauseProgram();
-		return NULL;
+		printf(_FG_B_RED"Can't create list"_RESET"\n\n");
+		exit(0);
 	}
 	else {
 		iniOp(&(p->op));
@@ -89,11 +87,11 @@ proposalList *newProposalListNode() {
 
 	if(node == NULL) {
 		system("cls");
-		printf(_FG_RED"Can't create list"_RESET"\n\n");
-		pauseProgram();
-		return NULL;
+		printf(_FG_B_RED"Can't create list"_RESET"\n\n");
+		exit(0);
 	}
 	else {
+		node->success = TRUE;
 		strcpy(node->proposalVersionFile,"--");
 		for(int i = 0; i < _MAXM; i++) {
 			for(int j = 0; j < _MAXT; j++){
@@ -109,9 +107,8 @@ proposal *newProposalNode() {
 
 	if(p == NULL) {
 		system("cls");
-		printf(_FG_RED"Can't create list"_RESET"\n\n");
-		pauseProgram();
-		return NULL;
+		printf(_FG_B_RED"Can't create list"_RESET"\n\n");
+		exit(0);
 	}
 	else {
 		p->jobId = 0;
@@ -535,9 +532,8 @@ jobList *deleteNode(jobList *root, int key, int originalKey, int *success) {
 			}
 
 			(*success) = 1;
-			while((temp->opL) != NULL) {
+			while(temp->opL->next != NULL) {
 				free(temp->opL);
-				temp->opL = NULL;
 				temp->opL = temp->opL->next;
 			}
 			free(temp);
@@ -965,6 +961,13 @@ int fillProposalSpace(proposalList *pL,int jobId, int opId, int lastTimeUsed, in
 				}
 			}
 
+			if(maxReached) {
+				pL->success = FALSE;
+				printf(_FG_RED"Couldn't save the data in the Proposal Plan\n"_RESET);
+				pauseProgram(); 
+				return _MAXT + 1;
+			}
+
 			if(spaceFree && (p = newProposalNode(), p != NULL)) {
 				p->jobId = jobId;
 				p->opId = opId;
@@ -975,11 +978,7 @@ int fillProposalSpace(proposalList *pL,int jobId, int opId, int lastTimeUsed, in
 				}
 				return j;
 			}
-			if(maxReached) {
-				printf("Couldn't save the data in the Proposal Plan\n");
-				pauseProgram(); 
-				return _MAXT;
-			}
+
 		}
 	}
 	return _MAXT;
@@ -1006,9 +1005,9 @@ void calcEscalationProposal(operationList *opL, int jobId, proposalList *pL) {
 		}
 		
 		lastTimeUsed = fillProposalSpace(pL,jobId,opId,lastTimeUsed,mach-1,minTime);
-		if(lastTimeUsed == _MAXT)
+		if(lastTimeUsed == _MAXT + 1)
 			return;
-
+		
 		opL = opL->next;
 	}
 }
@@ -1043,23 +1042,28 @@ void goThroughByOrderCalcProposal(jobList *n, proposalList *pL) {
 proposalList *updateEscalationProposal(proposalList *pL, jobList *jbL, int *changeCount) {
 	proposalList *p = NULL;
 	
-	// char *versionsDirectory = "VersionsDirectory\\";
-    // if (mkdir(versionsDirectory) == 1){}
-    // else if(errno != EEXIST) 
-    //     printf("Unable to create directory\nERROR number:%d",errno);
-
 	if(strcmp(pL->proposalVersionFile,"--") == 0) {
-		snprintf(pL->proposalVersionFile, sizeof(pL->proposalVersionFile), /*"VersionsDirectory"DIR_SEPARATOR*/"ProposalVersionNumber_%d.txt",(*changeCount));
+		snprintf(pL->proposalVersionFile, sizeof(pL->proposalVersionFile), "ProposalVersionNumber_%d.txt",(*changeCount));
 		saveDataInFile(jbL,pL->proposalVersionFile);
 		goThroughByOrderCalcProposal(jbL,pL);
+		if(pL->success == FALSE) {
+			FILE *f_JOB = fopen(pL->proposalVersionFile,"a");
+			fprintf(f_JOB,"\n\n\tNOTE:\n\tUnable to generate a escalation proposal for this version of the data!!!!!");
+			fclose(f_JOB);
+		}
 		(*changeCount)++;
 		return pL;
 	}
-	else { 
+	else {
 		if(p = newProposalListNode(), p != NULL) {
-			snprintf(p->proposalVersionFile, sizeof(p->proposalVersionFile), /*"VersionsDirectory"DIR_SEPARATOR*/"ProposalVersionNumber_%d.txt",(*changeCount));
+			snprintf(p->proposalVersionFile, sizeof(p->proposalVersionFile), "ProposalVersionNumber_%d.txt",(*changeCount));
 			saveDataInFile(jbL,p->proposalVersionFile);
 			goThroughByOrderCalcProposal(jbL,p);
+			if(p->success == FALSE) {
+				FILE *f_JOB = fopen(p->proposalVersionFile,"a");
+				fprintf(f_JOB,"\n\n\tNOTE:\n\tUnable to generate a escalation proposal for this version of the data!!!!!");
+				fclose(f_JOB);
+			}
 			p->next = pL;
 			(*changeCount)++;
 			return p;
@@ -1073,6 +1077,12 @@ proposalList *updateEscalationProposal(proposalList *pL, jobList *jbL, int *chan
  * @param pL is a pointer to a proposalList structure, the current version of the proposal
  */
 void printEscalationProposal(proposalList *pL) {
+	if(pL->success == FALSE) {
+		printf(_FG_B_YELLOW"Unable to generate escalation proposal with the following limits:\n"
+			    _FG_YELLOW"MAX NUMBER OF MACHINES-->"_FG_B_CYAN"%d\n"_FG_YELLOW"MAX TIME-->"_FG_B_CYAN"%d\n\n"_RESET,_MAXM,_MAXT);
+		return;
+	}
+
 	printf("\n\n"_FG_B_YELLOW"PROPOSAL WITH:\n"_FG_YELLOW"MAX NUMBER OF MACHINES-->"_FG_B_CYAN"%d\n"_FG_YELLOW"MAX TIME-->"_FG_B_CYAN"%d\n\n"_RESET,_MAXM,_MAXT);
 	printf(_FG_B_RED"\n\tNOTE"_FG_B_YELLOW
 			"\n\t|123|"_FG_YELLOW
@@ -1197,7 +1207,6 @@ void deallocate(jobList *root) {
 		free(root->opL->op.machineAndTime);
 		root->opL->op.machineAndTime = NULL;
 		free(root->opL);
-		root->opL = NULL;
 		root->opL = root->opL->next;
 	}
 
@@ -1222,7 +1231,6 @@ void deallocateProposal(proposalList *pL) {
 			
 		}
 		free(pL);
-		pL = NULL;
 		pL = pL->next;
 	}
 }
@@ -1244,7 +1252,7 @@ int askUserIntegers(const char *textToAsk) {
 		if(!fgets(buf, sizeof(buf), stdin)) {
 			printf("Something went wrong try again\n\n");
 			printf("Error: %d\n", errno);
-			pauseProgram();
+			exit(0);
 		}
 		errno = 0; // reset error number
 		inputConverted = strtol(buf, &endptr, 10);
@@ -1282,7 +1290,7 @@ int yesNo() {
 		if(!fgets(buf, sizeof(buf), stdin)) {
 			printf("Something went wrong try again\n\n");
 			printf("Error: %d\n", errno);
-			pauseProgram();
+			exit(0);
 		}
 		errno = 0;
 		buf[strcspn(buf, "\n")] = 0;
@@ -1333,7 +1341,7 @@ void menu(int *option) {
 		if(!fgets(buf, sizeof(buf), stdin)) {
 			printf("Something went wrong try again\n\n");
 			printf("Error: %d\n", errno);
-			pauseProgram();
+			exit(0);
 		}
 		errno = 0; // reset error number
 		(*option) = strtol(buf, &endptr, 10);
@@ -1393,7 +1401,7 @@ void menuEditJob(int *optionEditJob) {
 		if(!fgets(buf, sizeof(buf), stdin)) {
 			printf("Something went wrong try again\n\n");
 			printf("Error: %d\n", errno);
-			pauseProgram();
+			exit(0);
 		}
 		errno = 0; // reset error number
 		(*optionEditJob) = strtol(buf, &endptr, 10);

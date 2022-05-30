@@ -29,10 +29,11 @@ int main() {
 	jobList *jbL = NULL, *jobToFind = NULL;
 	proposalList *pL = newProposalListNode();
 	int option, optionEditJob, idContJob = 0, changeProposalCounter = 0, success = 0;
-	
+
 	system("cls");
 	jbL = checkDataInFile(jbL,&idContJob);
 	pL = updateEscalationProposal(pL,jbL,&changeProposalCounter);
+
 
 	do {
 		menu(&option);
