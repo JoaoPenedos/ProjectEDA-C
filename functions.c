@@ -78,7 +78,6 @@ operationList *newOperationListNode() {
 		return p;
 	}
 }
-
 /**
  * @brief It creates a new node for the proposal list.
  * 
@@ -104,6 +103,11 @@ proposalList *newProposalListNode() {
 		return node;
 	}
 }
+/**
+ * @brief It creates a new proposal node
+ * 
+ * @return A pointer to a proposal struct.
+ */
 proposal *newProposalNode() {
 	proposal *p = (proposal *) malloc(sizeof(proposal));
 
@@ -635,7 +639,7 @@ jobList *findJob(jobList *auxjbL) {
 	
 	if(auxjbL == NULL) { 
 		printf(_FG_RED"No jobs in the list\n"_RESET);
-		pauseProgram();
+		system("pause");
 		return NULL;
 	}
 	else {
@@ -1379,19 +1383,19 @@ void menu(int *option) {
 		}
 		if(errno == ERANGE) {
 			printf(_FG_RED"The number entered is either too large or too small."_RESET"\n\n");
-			pauseProgram();
+			system("pause");
 		}
 		else if (((*option) > 7) || ((*option) < 0)) {
 			printf(_FG_RED"Please enter a number between 0 and 7."_RESET"\n\n");
-			pauseProgram();
+			system("pause");
 		}
 		else if (endptr == buf)	{
 			printf(_FG_RED"No character was read. Please enter a number between 0 and 7."_RESET"\n\n");
-			pauseProgram();
+			system("pause");
 		}
 		else if ((*endptr) && (*endptr != '\n')) {
 			printf(_FG_RED"No character was read. Please enter a number between 0 and 7."_RESET"\n\n");
-			pauseProgram();
+			system("pause");
 		}
 		else {
 			success = TRUE;
@@ -1437,19 +1441,19 @@ void menuEditJob(int *optionEditJob) {
 		}
 		if(errno == ERANGE) {
 			printf(_FG_RED"The number entered is either too large or too small."_RESET"\n\n");
-			pauseProgram();
+			system("pause");
 		}
 		else if (((*optionEditJob) > 7) || ((*optionEditJob) < 0)) {
 			printf("Please enter a number between 0 and 7.\n\n");
-			pauseProgram();
+			system("pause");
 		}
 		else if (endptr == buf)	{
 			printf(_FG_RED"No character was read. Please enter a number between 0 and 7."_RESET"\n\n");
-			pauseProgram();
+			system("pause");
 		}
 		else if ((*endptr) && (*endptr != '\n')) {
 			printf(_FG_RED"No character was read. Please enter a number between 0 and 7."_RESET"\n\n");
-			pauseProgram();
+			system("pause");
 		}
 		else {
 			success = TRUE;

@@ -46,28 +46,28 @@ int main() {
 						printf("There are no Jobs in the List");					
 					else
 						ListJobTreeInOrder(jbL);
-					pauseProgram();
+					system("pause");
 					break;
 			case 2: system("cls");
 					printJobTreeByLevel(jbL,0);
 					printf(_RESET"\n");
-					pauseProgram();
+					system("pause");
 					break;
 			case 3: jobToFind = findJob(jbL);
-					pauseProgram();
+					system("pause");
 					break;
 			case 4: insertJob(&jbL,&idContJob,&success);
 					if(success)
 						pL = updateEscalationProposal(pL,jbL,&changeProposalCounter);
-					pauseProgram();
+					system("pause");
 					break;
 			case 5: removeJob(&jbL,&success);
 					if(success)
 						pL = updateEscalationProposal(pL,jbL,&changeProposalCounter);
-					pauseProgram();
+					system("pause");
 					break;
 			case 6: jobToFind = findJob(jbL);
-					pauseProgram();
+					system("pause");
 					if(jobToFind != NULL) {
 						do {
 							menuEditJob(&optionEditJob);
@@ -75,38 +75,38 @@ int main() {
 								default:
 								case 0: break;
 								case 1: listOperations(jobToFind->opL); 
-										pauseProgram(); 
+										system("pause"); 
 										break;
 								case 2: insertOperationNode(jobToFind->opL,&(jobToFind->jb.nOperations),&success);
 										if(success)
 											pL = updateEscalationProposal(pL,jbL,&changeProposalCounter);
-										pauseProgram();
+										system("pause");
 										break;
 								case 3: removeOperation(&(jobToFind->opL),&(jobToFind->jb.nOperations),&success);
 										if(success)
 											pL = updateEscalationProposal(pL,jbL,&changeProposalCounter);
-										pauseProgram();
+										system("pause");
 										break;
 								case 4: editOperation(jobToFind->opL,&success);
 										if(success)
 											pL = updateEscalationProposal(pL,jbL,&changeProposalCounter);
-										pauseProgram();
+										system("pause");
 										break;
 								case 5: determineShortestTime(jobToFind->opL);
-										pauseProgram();
+										system("pause");
 										break;
 								case 6: determineLongestTime(jobToFind->opL);
-										pauseProgram();
+										system("pause");
 										break;
 								case 7: determineAverageTime(jobToFind->opL);
-										pauseProgram();
+										system("pause");
 										break;
 							}
 						}while(optionEditJob != 0);
 					}
 					break;
 			case 7: printEscalationProposal(pL);
-					pauseProgram();
+					system("pause");
 					break;
 		}
 	}while(option != 0);
