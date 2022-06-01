@@ -28,7 +28,7 @@
 int main() {
 	jobList *jbL = NULL, *jobToFind = NULL;
 	proposalList *pL = newProposalListNode();
-	int option, optionEditJob, idContJob = 0, changeProposalCounter = 0, success = 0;
+	int option, optionEditJob, idContJob = 0, changeProposalCounter = 0, success = FALSE;
 
 	system("cls");
 	jbL = checkDataInFile(&idContJob);
@@ -42,7 +42,10 @@ int main() {
 			case 0: printf("Goodbye!!\n\n");
 					break;
 			case 1: system("cls");
-					ListJobTreeInOrder(jbL);
+					if(jbL == NULL)
+						printf("There are no Jobs in the List");					
+					else
+						ListJobTreeInOrder(jbL);
 					pauseProgram();
 					break;
 			case 2: system("cls");

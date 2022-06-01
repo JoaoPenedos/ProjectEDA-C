@@ -325,15 +325,15 @@ void ListJobTreeInOrder(jobList *n) {
  * @param m the operation
  * @param currentPosition the current position of the machine in the array
  * 
- * @return 0 if it finds equal machines and 1 if it doesn't find
+ * @return TRUE if it finds equal machines and FALSE if it doesn't find
  */
 int searchEqualMachine(operation m, int currentPosition) {
 	for(int i = currentPosition - 1; i >= 0; i--) {
 		if(m.machineAndTime[i] == m.machineAndTime[currentPosition])
-			return 0;
+			return TRUE;
 	}
 
-	return 1;
+	return FALSE;
 }
 /**
  * @brief It creates a new operation node and inserts it at the end of the operation list
@@ -530,7 +530,7 @@ jobList *deleteNode(jobList *root, int key, int originalKey, int *success) {
 				*root = *temp;
 			}
 
-			(*success) = 1;
+			(*success) = TRUE;
 
 			// deallocateOperation(temp->opL);
 			free(temp);
@@ -580,7 +580,7 @@ void removeJob(jobList **jbL, int *success) {
 	int intElemRetirar;
 
 	system("cls");
-	(*success) = 0;
+	(*success) = FALSE;
 	
 	if((*jbL) == NULL) { 
 		printf(_FG_RED"No operations in the list\n"_RESET); 
@@ -657,7 +657,7 @@ jobList *findJob(jobList *auxjbL) {
  */
 void readOperation(operation *op) {
 	char str[100];
-	int i, j, check;
+	int i, j, checkEqual = FALSE;
 
 	op->quantMachines = askUserIntegers(_FG_YELLOW"How many machines can be used for this operation: "_RESET);
 
@@ -667,24 +667,24 @@ void readOperation(operation *op) {
 			if(i == 0) {
 				do {
 					if( j > 0) {
-						check = 0;
+						checkEqual = FALSE;
 						op->machineAndTime[i*op->quantMachines + j] = askUserIntegers(_FG_YELLOW"What is the id of the machine you want to use: "_RESET);
 
 						if(op->machineAndTime[i*op->quantMachines + j] > _MAXM)
 							printf(_FG_RED"\nMachine number can't be higher than "_FG_CYAN"%d"_FG_RED" (input:"_FG_CYAN"%d"_FG_RED"), please choose another!!\n\n"_RESET, _MAXM, op->machineAndTime[i*op->quantMachines + j]);
 						else {
-							check = searchEqualMachine((*op),j);
-							if(check == 0) 
+							checkEqual = searchEqualMachine((*op),j);
+							if(checkEqual) 
 								printf(_FG_RED"\nMachine "_FG_CYAN"%d"_FG_RED" already in use!! Chose another\n\n"_RESET, op->machineAndTime[i*op->quantMachines + j]);
 						}
 					}
 					else {
-						check = 1;
+						checkEqual = FALSE;
 						op->machineAndTime[i*op->quantMachines + j] = askUserIntegers(_FG_YELLOW"What is the id of the machine you want to use: "_RESET);
 						if(op->machineAndTime[i*op->quantMachines + j] > _MAXM)
 							printf(_FG_RED"\nMachine number can't be higher than "_FG_CYAN"%d"_FG_RED" (input:"_FG_CYAN"%d"_FG_RED"), please choose another!!\n\n"_RESET, _MAXM, op->machineAndTime[i*op->quantMachines + j]);
 					}
-				}while(check == 0);
+				}while(checkEqual);
 			}
 			else {
 				snprintf(str, sizeof(str), _FG_YELLOW"How long will machine "_FG_CYAN"%d"_FG_YELLOW" take: "_RESET, op->machineAndTime[_MACHINES*op->quantMachines + j]);
@@ -704,14 +704,14 @@ void insertOperationNode(operationList *op, int *nOperations, int *success) {
 	int id = 1;
 
 	system("cls");
-	(*success) = 0;
+	(*success) = FALSE;
 	if(auxOp = newOperationListNode(), auxOp != NULL) {
 		while((op->next) != NULL) {
 			id = op->op.id + 1;
 			op = op->next;
 		}
 
-		(*success) = 1;
+		(*success) = TRUE;
 		(*nOperations)++;
 		op->op.id = id;
 		readOperation(&op->op);
@@ -747,7 +747,7 @@ void removeOperation(operationList **opL, int *nOperations, int *success) {
 			listOperationNode((*opL)->op);
 			(*opL) = (*opL)->next;
 			free(y);
-			(*success) = 1;
+			(*success) = TRUE;
 		}
 		else {
 			auxOp = (*opL);
@@ -765,11 +765,11 @@ void removeOperation(operationList **opL, int *nOperations, int *success) {
 				printf(_FG_YELLOW"The element has been removed\n"_RESET);
 				listOperationNode(auxOp->op);
 				free(auxOp);
-				(*success) = 1;
+				(*success) = TRUE;
 			}
 			else {
 				system("cls");
-				(*success) = 0;
+				(*success) = FALSE;
 				printf(_FG_RED"The element with code "_FG_CYAN"%d"_FG_RED" does not exist in the list"_RESET, intElemRetirar);
 			}
 		}
@@ -799,7 +799,7 @@ void editOperation(operationList *opL, int *success) {
 			printf(_FG_YELLOW"The element being edited\n"_RESET);
 			listOperationNode(opL->op);
 			readOperation(&(opL->op));
-			(*success) = 1;
+			(*success) = TRUE;
 		}
 		else {
 			while((intElemEditar != opL->op.id) && (opL->next != NULL)) {
@@ -811,11 +811,11 @@ void editOperation(operationList *opL, int *success) {
 				printf(_FG_YELLOW"The element being edited\n"_RESET);
 				listOperationNode(opL->op);
 				readOperation(&(opL->op));
-				(*success) = 1;
+				(*success) = TRUE;
 			}
 			else {
 				system("cls");
-				(*success) = 0;
+				(*success) = FALSE;
 				printf(_FG_RED"The element with code "_FG_CYAN"%d"_FG_RED" does not exist in the list"_RESET, intElemEditar);
 			}
 		}
@@ -940,7 +940,7 @@ void determineAverageTime(operationList *opL) {
  */
 int fillProposalSpace(proposalList *pL,int jobId, int opId, int lastTimeUsed, int mach, int minTime) {
 	proposal *p = NULL;
-	int i, j, spaceFree = 0, maxReached = 0;
+	int i, j, spaceFree = FALSE, maxReached = FALSE;
 
 	for(i = lastTimeUsed; i < _MAXT; i++) {
 		if(pL->proposalData[mach][i] == NULL) {
@@ -1210,8 +1210,7 @@ void saveDataYN(jobList *jbL) {
 	}
 	else {
 		printf(_FG_CYAN"Do you to save the data in the file??"_RESET"\n");
-		opYN = yesNo();
-		if(opYN != 0) {
+		if (opYN = yesNo(), opYN == 1) {
 			saveDataInFile(jbL,"dados.txt");
 			return;
 		}
@@ -1354,7 +1353,7 @@ void menu(int *option) {
 	
 	do {
 		system("cls");
-		success = 0;
+		success = FALSE;
 
 		printf(_FG_CYAN"%c",201); for(i = 0; i < 77; i++) printf("%c",205); printf("%c\n",187);
 		_printf_p("%1$c                                   "_FG_YELLOW"MENU"_FG_CYAN"                                      %1$c\n"
@@ -1395,7 +1394,7 @@ void menu(int *option) {
 			pauseProgram();
 		}
 		else {
-			success = 1;
+			success = TRUE;
 		}
 	}while(!success);
 }
@@ -1410,7 +1409,7 @@ void menuEditJob(int *optionEditJob) {
 	
 	do {
 		system("cls");
-		success = 0;
+		success = FALSE;
 
 		printf(_FG_CYAN"%c",201); for(i = 0; i < 77; i++) printf("%c",205); printf("%c\n",187);
 		_printf_p("%1$c                               "_FG_YELLOW"MENU - Edit Job"_FG_CYAN"                               %1$c\n"
@@ -1453,7 +1452,7 @@ void menuEditJob(int *optionEditJob) {
 			pauseProgram();
 		}
 		else {
-			success = 1;
+			success = TRUE;
 		}
 	}while(!success);
 }
