@@ -2,7 +2,7 @@
  * @file main.c
  * @author João Penedos
  * @brief
- * @version 0.9
+ * @version 2.0
  * 
  * @copyright Copyright (c) 2022 
  */
@@ -31,9 +31,8 @@ int main() {
 	int option, optionEditJob, idContJob = 0, changeProposalCounter = 0, success = 0;
 
 	system("cls");
-	jbL = checkDataInFile(jbL,&idContJob);
+	jbL = checkDataInFile(&idContJob);
 	pL = updateEscalationProposal(pL,jbL,&changeProposalCounter);
-
 
 	do {
 		menu(&option);
@@ -57,12 +56,13 @@ int main() {
 			case 4: insertJob(&jbL,&idContJob,&success);
 					if(success)
 						pL = updateEscalationProposal(pL,jbL,&changeProposalCounter);
+					pauseProgram();
 					break;
 			case 5: removeJob(&jbL,&success);
 					if(success)
 						pL = updateEscalationProposal(pL,jbL,&changeProposalCounter);
 					pauseProgram();
-			break;
+					break;
 			case 6: jobToFind = findJob(jbL);
 					pauseProgram();
 					if(jobToFind != NULL) {
@@ -79,7 +79,7 @@ int main() {
 											pL = updateEscalationProposal(pL,jbL,&changeProposalCounter);
 										pauseProgram();
 										break;
-								case 3: removeOperation(jobToFind->opL,&(jobToFind->jb.nOperations),&success);
+								case 3: removeOperation(&(jobToFind->opL),&(jobToFind->jb.nOperations),&success);
 										if(success)
 											pL = updateEscalationProposal(pL,jbL,&changeProposalCounter);
 										pauseProgram();
@@ -110,7 +110,7 @@ int main() {
 	
 	saveDataYN(jbL);
 
-	deallocate(jbL);
+	deallocateJob(jbL);
 	deallocateProposal(pL);
 	
 	return 0;

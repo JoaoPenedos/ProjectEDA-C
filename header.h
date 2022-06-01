@@ -2,7 +2,7 @@
  * @file header.h
  * @author João Penedos
  * @brief
- * @version 0.9
+ * @version 2.0
  * 
  * @copyright Copyright (c) 2022 
  */
@@ -93,10 +93,10 @@ void listOperations(operationList *auxOpL);
 void listJobNode(operationList *auxOpL, job jb);
 void ListJobTreeInOrder(jobList *n);
 
-int searchEqualMachine(operation m, int elemToFind, int currentPosition);
+int searchEqualMachine(operation m, int currentPosition);
 
 void createOperationFromFile(operationList *opL, int idOp, int cont, int arrM[], int arrT[]);
-jobList *checkDataInFile(jobList *jbL, int *idContJob);
+jobList *checkDataInFile(int *idContJob);
 
 jobList *insertNode(jobList *node, int key, jobList **nodePointer);
 void insertJob(jobList **jbL, int *idContJob, int *success);
@@ -109,7 +109,7 @@ jobList *findJob(jobList *auxjbL);
 
 void readOperation(operation *op);
 void insertOperationNode(operationList *op, int *nOperations, int *success);
-void removeOperation(operationList *opL, int *nOperations, int *success);
+void removeOperation(operationList **opL, int *nOperations, int *success);
 void editOperation(operationList *opL, int *success);
 
 void determineShortestTime(operationList *opL);
@@ -121,13 +121,15 @@ void calcEscalationProposal(operationList *opL, int jobId, proposalList *pL);
 void goThroughByOrderCalcProposal(jobList *n, proposalList *pL);
 proposalList *updateEscalationProposal(proposalList *pL, jobList *jbL, int *changeCount);
 void printEscalationProposal(proposalList *pL);
+void saveProposalInFile(proposalList *pL);
 
 void writeInFile(operationList *opL, int id, FILE *f_JOB);
 void saveDataInFile(jobList *jbL, const char *fileName);
 void orderTreeToSaveInFile(jobList *n, FILE *f_JOB);
 void saveDataYN(jobList *jbL);
 
-void deallocate(jobList *root);
+void deallocateOperation(operationList *opL);
+void deallocateJob(jobList *root);
 void deallocateProposal(proposalList *pL);
 #pragma endregion
 
